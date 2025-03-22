@@ -1,0 +1,25 @@
+{
+  "name": "anime-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jarkurghan/anime-bot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/jarkurghan/anime-bot/issues"
+  },
+  "homepage": "https://github.com/jarkurghan/anime-bot#readme",
+  "dependencies": {
+    "knex": "^3.1.0",
+    "sqlite3": "^5.1.7"
+  }
+}
