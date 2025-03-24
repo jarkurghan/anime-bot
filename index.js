@@ -13,10 +13,13 @@ const { search } = require("./src/search");
 const { watch } = require("./src/watch");
 const { info } = require("./src/info");
 const { changePage } = require("./src/anime-page.js");
+const { selectPage } = require("./src/anime-page.js");
 
 const actions = { sendToAll: { flag: false, time: new Date() } };
 
 bot.start(start);
+bot.action(/anime_(\d+)/, selectPage);
+bot.action(/anime_list_(\d+)/, changePage);
 bot.on("message", handleMessage);
 bot.hears("📂 Boshqa mavsum", changeSeason);
 bot.action(/season_(.+)/, changeSeasonAction);
@@ -25,7 +28,6 @@ bot.hears("📄 Mavsum haqida", info);
 bot.hears("moh2004", sendToAll);
 bot.on("text", sendVideo);
 bot.action(/^watch_(\d+)_(.+)$/, watch);
-bot.action(/anime_list_(\d+)/, changePage);
 
 bot.launch();
 

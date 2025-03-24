@@ -11,7 +11,7 @@ exports.up = function (knex) {
         })
         .createTable("anime_info", function (table) {
             table.increments("id").primary();
-            table.text("info").notNullable();
+            table.integer("post_id").notNullable().unique();
             table.integer("anime_id").references("id").inTable("anime").notNullable();
         })
         .createTable("episode", function (table) {

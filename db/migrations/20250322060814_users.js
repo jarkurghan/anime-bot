@@ -15,7 +15,7 @@ exports.up = function (knex) {
         .createTable("user_page", function (table) {
             table.increments("id").primary();
             table.integer("user_id").notNullable().unique();
-            table.integer("user_id").references("id").inTable("user");
+            table.foreign("user_id").references("id").inTable("user").onDelete("CASCADE");
             table.integer("anime_id").references("id").inTable("anime");
             table.integer("anime_page").defaultTo(0);
             table.integer("episode_page").defaultTo(0);
