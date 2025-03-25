@@ -16,14 +16,14 @@ async function handleMessage(ctx, next) {
             return ctx.reply("❌ Oyna yopilgan!");
         }
 
-        // return next(); // Agar admin bo‘lsa, tekshirishni o‘tkazib yuborish
+        // return next(); // Agar admin bo'lsa, tekshirishni o'tkazib yuborish
     }
 
     const notSubscribed = await checkSubscription(ctx);
 
     if (notSubscribed.length > 0) {
         return ctx.reply(
-            "❌ Botdan foydalanish uchun quyidagi kanal" + (requiredChannels.length > 1 ? "lar" : "") + "ga a'zo bo‘ling:",
+            "❌ Botdan foydalanish uchun quyidagi kanal" + (requiredChannels.length > 1 ? "lar" : "") + "ga a'zo bo'ling:",
             Markup.inlineKeyboard(notSubscribed.map((channel) => [{ text: channel.name, url: `https://t.me/${channel.username.slice(1)}` }]))
         );
     }

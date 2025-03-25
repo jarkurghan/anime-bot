@@ -4,31 +4,25 @@ const { Telegraf } = require("telegraf");
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const { start } = require("./src/start");
-const { sendVideo } = require("./src/send-video");
-const { handleMessage } = require("./src/message.js");
-const { changeSeasonAction } = require("./src/change-season");
-const { changeSeason } = require("./src/change-season");
-const { sendToAll } = require("./src/send-to-all");
-const { search } = require("./src/search");
-const { watch } = require("./src/watch");
-const { info } = require("./src/info");
-const { changePage } = require("./src/anime-page.js");
-const { selectPage } = require("./src/anime-page.js");
-
-const actions = { sendToAll: { flag: false, time: new Date() } };
+const { handleMessage } = require("./src/auth.js");
+const { episodePage } = require("./src/methods.js");
+const { selectEpisode } = require("./src/methods.js");
+const { backToAnime } = require("./src/methods.js");
+const { changePage } = require("./src/methods.js");
+const { selectAnime } = require("./src/methods.js");
+const { animeList } = require("./src/methods.js");
+const { episodeList } = require("./src/methods.js");
+const { watch } = require("./src/methods.js");
 
 bot.start(start);
-bot.action(/anime_(\d+)/, selectPage);
-bot.action(/anime_list_(\d+)/, changePage);
 bot.on("message", handleMessage);
-bot.hears("📂 Boshqa mavsum", changeSeason);
-bot.action(/season_(.+)/, changeSeasonAction);
-bot.hears("🔍 Qidirish", search);
-bot.hears("📄 Mavsum haqida", info);
-bot.hears("moh2004", sendToAll);
-bot.on("text", sendVideo);
-bot.action(/^watch_(\d+)_(.+)$/, watch);
+bot.action(/^anime_(\d+)$/, selectAnime);
+bot.action(/^anime_list_(\d+)$/, changePage);
+bot.action(/^back_anime_list$/, backToAnime);
+bot.action(/^episode_(\d+)$/, selectEpisode);
+bot.action(/^elist_(\d+)_(\d+)$/, episodePage);
+bot.action(/^episode_list$/, episodeList);
+bot.action(/^anime_list$/, animeList);
+bot.action(/^watch_(.+)$/, watch);
 
 bot.launch();
-
-exports.actions = actions;

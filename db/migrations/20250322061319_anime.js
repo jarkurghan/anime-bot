@@ -7,6 +7,7 @@ exports.up = function (knex) {
         .createTable("anime", function (table) {
             table.increments("id").primary();
             table.string("name").notNullable();
+            table.integer("number_of_episode").notNullable();
             table.timestamp("created_at").defaultTo(knex.fn.now());
         })
         .createTable("anime_info", function (table) {
@@ -16,10 +17,9 @@ exports.up = function (knex) {
         })
         .createTable("episode", function (table) {
             table.increments("id").primary();
-            table.string("qism").notNullable();
-            table.string("nom").notNullable();
-            table.string("dublyaj").notNullable();
-            table.integer("post_id").notNullable();
+            table.string("episode").notNullable();
+            table.string("name").notNullable();
+            table.string("dub").notNullable();
             table.integer("anime_id").references("id").inTable("anime").notNullable();
         })
         .createTable("channel_post", function (table) {

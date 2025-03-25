@@ -11,7 +11,7 @@ async function checkSubscription(ctx) {
     //             notSubscribed.push(channel);
     //         }
     //     } catch (error) {
-    //         console.error(`Kanal tekshirib bo‘lmadi: ${channel.username}`, error);
+    //         console.error(`Kanal tekshirib bo'lmadi: ${channel.username}`, error);
     //     }
     // }
 

@@ -1,7 +1,7 @@
 const { Telegraf, Markup } = require("telegraf");
 const db = require("../db/db");
 const { checkSubscription } = require("./check-subscription");
-const { renderAnimePage } = require("./anime-page");
+const { renderAnimePage } = require("./methods");
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -35,16 +35,13 @@ async function start(ctx) {
 
     if (notSubscribed.length > 0) {
         return ctx.reply(
-            "❌ Botdan foydalanish uchun quyidagi kanal" + (requiredChannels.length > 1 ? "lar" : "") + "ga a'zo bo‘ling:",
+            "❌ Botdan foydalanish uchun quyidagi kanal" + (requiredChannels.length > 1 ? "lar" : "") + "ga a'zo bo'ling:",
             Markup.inlineKeyboard(notSubscribed.map((channel) => [{ text: channel.name, url: `https://t.me/${channel.username.slice(1)}` }]))
         );
     }
 
     //------------------------------- response ---------------------------------
     await ctx.reply("Botga xush kelibsiz! 🎉\n\n", Markup.removeKeyboard());
-    // Markup.keyboard([["🔍 Qidirish"], ["📄 Mavsum haqida"], ["📂 Boshqa mavsum"]].slice(existingUser ? 0 : 1, 3))
-    // .resize()
-    // .oneTime()
 
     const page = existingUser ? await db("user_page").where({ user_id: existingUser.id }).first().page : 0;
     const { textList, buttons } = await renderAnimePage(page);
