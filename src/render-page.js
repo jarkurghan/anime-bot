@@ -51,7 +51,7 @@ const renderAnimePage = async (page = 0) => {
 
 const renderEpisodePage = async (animeId, page) => {
     const pageSize = 10;
-    const episodeList = await db("episode").select("id", "episode", "name").where("anime_id", animeId).groupBy("episode").orderBy("episode");
+    const episodeList = await db("episode").select("id", "episode", "name").where("anime_id", animeId).groupBy("episode").orderBy("id");
     const anime = await db("anime").select("id", "name").where("id", animeId).first();
 
     const totalPages = Math.ceil(episodeList.length / pageSize);
@@ -65,7 +65,7 @@ const renderEpisodePage = async (animeId, page) => {
     const currentPage = getPage(page);
     const textList =
         `<b>${anime.name}: ${page * pageSize + 1}-${page * pageSize + currentPage.length}</b> \nUmumiy ${episodeList.length} qism\n\n` +
-        currentPage.map((episode) => `<i>${episode.episode}-qism. ${episode.name}</i>`).join("\n");
+        currentPage.map((episode) => `<i>${episode.episode}. ${episode.name}</i>`).join("\n");
     // "\n\nBu yerda sizning reklamangiz bo'lishi mumkin edi!";
 
     const buttons = [];

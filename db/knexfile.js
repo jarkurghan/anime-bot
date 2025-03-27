@@ -1,4 +1,6 @@
 // Update with your config settings.
+require("dotenv").config({ path: process.env.NODE_ENV === "production" ? ".env.production" : ".env" });
+require("dotenv").config({ path: process.env.NODE_ENV === "production" ? "../.env.production" : "../.env" });
 
 const path = require("path");
 /**
@@ -7,7 +9,7 @@ const path = require("path");
 module.exports = {
     client: "sqlite3",
     connection: {
-        filename: path.join(__dirname, "../drafts/database.sqlite"),
+        filename: path.join(__dirname, process.env.DATABASE),
     },
     useNullAsDefault: true,
     migrations: {

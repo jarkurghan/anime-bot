@@ -74,7 +74,7 @@ const selectEpisode = async (ctx) => {
         } else {
             const buttons = allDub.map((dub) => [Markup.button.callback(`🎙 ${dub.dub}`, `watch_${dub.id}`)]);
             const buttonOptions = { parse_mode: "HTML", ...Markup.inlineKeyboard(buttons) };
-            const text = `🎥 <b>${episode.episode}-qism. ${episode.name}</b>\n\nUshbu qism bir nechta dublyaj studiyasi tomonidan dublyaj qilingan:`;
+            const text = `🎥 <b>${episode.episode}. ${episode.name}</b>\n\nUshbu qism bir nechta dublyaj studiyasi tomonidan dublyaj qilingan:`;
             await ctx.reply(text, buttonOptions);
             await ctx.deleteMessage();
         }
