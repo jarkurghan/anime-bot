@@ -16,6 +16,19 @@ const { episodeList } = require("./src/methods.js");
 const { sendDataToAdmin } = require("./src/scheduler.js");
 
 bot.start(start);
+bot.on("channel_post", (ctx) => {
+    const post = ctx.channelPost;
+    console.log(post);
+
+    // Post matniga yangi qator qo'shish
+    // const updatedText = post.text + "\n\n✅ Ushbu post bot orqali qayta ishlandi";
+
+    // Tahrirlash (agar bot admin bo'lsa)
+    // ctx.editMessageText(updatedText).catch((err) => {
+    //     console.error("Postni tahrirlashda xato:", err);
+    // });
+});
+
 bot.action(/^anime_(\d+)$/, handleMessage, selectAnime);
 bot.action(/^anime_list_(\d+)$/, handleMessage, changePage);
 bot.action(/^back_anime_list$/, handleMessage, backToAnime);
