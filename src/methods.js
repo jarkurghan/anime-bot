@@ -24,9 +24,29 @@ const selectAnime = async (ctx) => {
         const user = await db("user").where("user_id", ctx.from.id).first();
         await db("user_page").where("user_id", user.id).update({ anime_id: animeID, episode_page: 0 });
 
-        const { textList, buttons } = await renderEpisodePage(animeID, 0);
-        const keyboard = Markup.inlineKeyboard(buttons);
-        await ctx.reply(textList, { parse_mode: "HTML", ...keyboard });
+        const anime = await db("anime").where("id", animeID).first();
+        if (anime.number_of_episode === 1) {
+            const channel = process.env.CHANNEL_ID;
+            const post = await db("episode").where("anime_id", animeID).first();
+
+            const allDub = await db("episode").where({ anime_id: post.anime_id, episode: post.episode });
+            if (allDub.length === 1) {
+                const posts = await db("channel_post").where({ episode_id: allDub[0].id });
+                for (let i = 0; i < posts.length; i++) await ctx.telegram.copyMessage(ctx.chat.id, channel, posts[i].post_id);
+
+                const buttons = [[Markup.button.callback("📂 Animelar ro'yxati", "anime_list")]];
+                await ctx.reply("Quyidagi menulardan birini tanlang 👇", { parse_mode: "HTML", ...Markup.inlineKeyboard(buttons) });
+            } else {
+                const buttons = allDub.map((dub) => [Markup.button.callback(`🎙 ${dub.dub}`, `watch_${dub.id}`)]);
+                const buttonOptions = { parse_mode: "HTML", ...Markup.inlineKeyboard(buttons) };
+                const text = `🎥 <b>${episode.episode}. ${episode.name}</b>\n\nUshbu qism bir nechta dublyaj studiyasi tomonidan dublyaj qilingan:`;
+                await ctx.reply(text, buttonOptions);
+            }
+        } else {
+            const { textList, buttons } = await renderEpisodePage(animeID, 0);
+            const keyboard = Markup.inlineKeyboard(buttons);
+            await ctx.reply(textList, { parse_mode: "HTML", ...keyboard });
+        }
 
         ctx.deleteMessage();
     } catch (err) {
