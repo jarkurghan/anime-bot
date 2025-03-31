@@ -65,7 +65,8 @@ const renderEpisodePage = async (animeId, page) => {
     const currentPage = getPage(page);
     const textList =
         `<b>${anime.name}: ${page * pageSize + 1}-${page * pageSize + currentPage.length}</b> \nUmumiy ${episodeList.length} qism\n\n` +
-        currentPage.map((episode) => `<i>${episode.episode}. ${episode.name}</i>`).join("\n");
+        currentPage.map((episode, i) => `<i>${page * pageSize + 1 + i}. <b>${episode.episode}</b>. ${episode.name}</i>`).join("\n");
+    // + "\n\n<blockquote>Bot yangiliklaridan xabardor bo'lish uchun @ani_uz_news kanaliga a'zo bo'ling!</blockquote>";
     // "\n\nBu yerda sizning reklamangiz bo'lishi mumkin edi!";
 
     const buttons = [];

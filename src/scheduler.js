@@ -2,27 +2,38 @@ const schedule = require("node-schedule");
 const fs = require("fs");
 const path = require("path");
 const db = require("../db/db");
-const { Telegraf } = require("telegraf");
 
-const bot = new Telegraf(process.env.BOT_TOKEN);
-const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID; 
+const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID;
 
-const sendDataToAdmin = () => {
+const sendDataToAdmin = (bot) => {
     schedule.scheduleJob("0 0 * * *", async () => {
         try {
             const users = await db("user").select("*");
             const anime = await db("anime").select("*");
             const episodes = await db("episode").select("*");
-
             const data = { users, anime, episodes };
-            const filePath = path.join(__dirname, "../data/dump.json");
-            fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
 
-            await bot.telegram.sendDocument(ADMIN_CHAT_ID, { source: filePath }, { caption: "📂 Har kungi ma'lumotlar bazasi dump fayli." });
+            const papka = process.env.NODE_ENV === "production" ? "db" : "drafts";
+            const JSONFilePath = path.join(__dirname, `../${papka}/dump.json`);
+            const DBFilePath = path.join(__dirname, process.env.DATABASE);
 
-            console.log("✅ JSON fayl yaratildi va admin chatga yuborildi.");
+            await fs.promises.writeFile(JSONFilePath, JSON.stringify(data, null, 2));
+            await bot.telegram.sendDocument(ADMIN_CHAT_ID, { source: DBFilePath }, { caption: "Ma'lumotlar bazasi" });
+            await bot.telegram.sendDocument(ADMIN_CHAT_ID, { source: JSONFilePath }, { caption: "Ma'lumotlar bazasi json fayli." });
+            await fs.promises.unlink(JSONFilePath);
+
+            const message =
+                "<b><i>Ma'lumotlar bazasida:</i></b>\n" +
+                `📌 <i>Foydalanuvchilar soni: ${users.length}</i>\n` +
+                `🔢 <i>Animelar soni: ${anime.length}</i>\n` +
+                `🎞 <i>Barcha qismlar soni: ${episodes.length}</i>`;
+            `🎙 <i>Dublyaj studiyalari soni: ${episodes.length}</i>`;
+            await bot.telegram.sendMessage(ADMIN_CHAT_ID, message, { parse_mode: "HTML" });
+
+            console.log("✅ scheduler");
         } catch (error) {
-            console.error("❌ Xatolik yuz berdi:", error);
+            console.error("❌ scheduler error:");
+            console.error(error);
         }
     });
 };

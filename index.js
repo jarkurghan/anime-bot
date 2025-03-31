@@ -38,6 +38,6 @@ bot.action(/^episode_list$/, handleMessage, episodeList);
 bot.action(/^anime_list$/, handleMessage, animeList);
 bot.action(/^watch_(.+)$/, handleMessage, watch);
 
-sendDataToAdmin();
+sendDataToAdmin(bot);
 
 bot.launch();
