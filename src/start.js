@@ -7,14 +7,14 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const requiredChannels = [{ username: process.env.MY_CHANNEL_USERNAME, name: process.env.MY_CHANNEL_NAME }];
 
-async function start(ctx) {
-    //------------------------------- insert db ---------------------------------
+async function createUserDB(ctx) {
     const { id: user_id, username, first_name, last_name } = ctx.from;
     const user = { user_id, username, first_name, last_name };
 
     const existingUser = await db("user").where({ user_id }).first();
     try {
         if (!existingUser) {
+            await ctx.reply("Botga xush kelibsiz! 🎉\n\n", Markup.removeKeyboard());
             const dbUser = await db("user").insert(user).returning("*");
             await db("user_page").insert({ user_id: dbUser[0].id });
             const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID;
@@ -29,6 +29,12 @@ async function start(ctx) {
     } catch (err) {
         console.error("❌ Foydalanuvchini saqlashda xatolik:", err);
     }
+}
+
+async function start(ctx) {
+    //------------------------------- insert db ---------------------------------
+    await createUserDB(ctx);
+    const existingUser = await db("user").where({ user_id: ctx.from.id }).first();
 
     //------------------------------- check subscription ---------------------------------
     const notSubscribed = await checkSubscription(ctx);
@@ -41,7 +47,6 @@ async function start(ctx) {
     }
 
     //------------------------------- response ---------------------------------
-    await ctx.reply("Botga xush kelibsiz! 🎉\n\n", Markup.removeKeyboard());
 
     const page = existingUser ? await db("user_page").where({ user_id: existingUser.id }).first().page : 0;
     const { textList, buttons } = await renderAnimePage(page);

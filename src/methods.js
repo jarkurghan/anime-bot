@@ -7,6 +7,7 @@ const changePage = async (ctx) => {
     try {
         const page = parseInt(ctx.match[1]);
         const user = await db("user").where("user_id", ctx.from.id).first();
+        if (!user) return ctx.reply("❌ Foydalanuvchi ma'lumotlari topilmadi. Iltimos, /start buyrug'ini bosing.");
         await db("user_page").where("user_id", user.id).update({ anime_page: page });
 
         const { textList, buttons } = await renderAnimePage(page);
@@ -22,6 +23,7 @@ const selectAnime = async (ctx) => {
     try {
         const animeID = parseInt(ctx.match[1]);
         const user = await db("user").where("user_id", ctx.from.id).first();
+        if (!user) return ctx.reply("❌ Foydalanuvchi ma'lumotlari topilmadi. Iltimos, /start buyrug'ini bosing.");
         await db("user_page").where("user_id", user.id).update({ anime_id: animeID, episode_page: 0 });
 
         const anime = await db("anime").where("id", animeID).first();
@@ -43,6 +45,25 @@ const selectAnime = async (ctx) => {
                 await ctx.reply(text, buttonOptions);
             }
         } else {
+            // ------ send dub list ---
+            const dub = await db("episode").leftJoin("dub", "dub.id", "episode.dub").select("dub.name", "episode").where({ anime_id: animeID });
+            const groupedDub = dub.reduce((acc, item) => {
+                item.episode = item.episode.replace("-qism", "").replace("-fasl ", "-").replace("-mavsum ", "-");
+                if (!acc[item.name]) acc[item.name] = [];
+                acc[item.name].push(item.episode);
+                return acc;
+            }, {});
+
+            let message = "<b>" + anime.name + "</b>. Dublaj studiyalari va tarjima qilingan qismlar:\n\n";
+            const sortedDub = Object.entries(groupedDub).sort((a, b) => Math.min(...a[1]) - Math.min(...b[1]));
+
+            for (const [dub, qismlar] of sortedDub) {
+                const sortedQismlar = qismlar.sort((a, b) => a - b);
+                message += `🎙 <b>${dub}</b>: ${sortedQismlar.join(", ")}\n`;
+            }
+            await ctx.replyWithHTML(message);
+
+            // ------ send episode list ---
             const { textList, buttons } = await renderEpisodePage(animeID, 0);
             const keyboard = Markup.inlineKeyboard(buttons);
             await ctx.reply(textList, { parse_mode: "HTML", ...keyboard });
@@ -60,6 +81,7 @@ const episodePage = async (ctx) => {
         const anime = parseInt(ctx.match[1]);
         const page = parseInt(ctx.match[2]);
         const user = await db("user").where("user_id", ctx.from.id).first();
+        if (!user) return ctx.reply("❌ Foydalanuvchi ma'lumotlari topilmadi. Iltimos, /start buyrug'ini bosing.");
         await db("user_page").where("user_id", user.id).update({ episode_page: page });
 
         const { textList, buttons } = await renderEpisodePage(anime, page);
@@ -106,7 +128,10 @@ const selectEpisode = async (ctx) => {
 
 const backToAnime = async (ctx) => {
     try {
+        console.log(1);
+
         const user = await db("user").where("user_id", ctx.from.id).first();
+        if (!user) return ctx.reply("❌ Foydalanuvchi ma'lumotlari topilmadi. Iltimos, /start buyrug'ini bosing.");
         const page = await db("user_page").where("user_id", user.id);
 
         const { textList, buttons } = await renderAnimePage(page.anime_page);
@@ -123,6 +148,7 @@ const backToAnime = async (ctx) => {
 const animeList = async (ctx) => {
     try {
         const user = await db("user").where("user_id", ctx.from.id).first();
+        if (!user) return ctx.reply("❌ Foydalanuvchi ma'lumotlari topilmadi. Iltimos, /start buyrug'ini bosing.");
         const page = await db("user_page").where("user_id", user.id).first();
         const { textList, buttons } = await renderAnimePage(page.anime_page);
         const keyboard = Markup.inlineKeyboard(buttons);
@@ -137,6 +163,7 @@ const animeList = async (ctx) => {
 const episodeList = async (ctx) => {
     try {
         const user = await db("user").where("user_id", ctx.from.id).first();
+        if (!user) return ctx.reply("❌ Foydalanuvchi ma'lumotlari topilmadi. Iltimos, /start buyrug'ini bosing.");
         const page = await db("user_page").where("user_id", user.id).first();
         const { textList, buttons } = await renderEpisodePage(page.anime_id, page.episode_page);
         const keyboard = Markup.inlineKeyboard(buttons);

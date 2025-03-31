@@ -41,5 +41,5 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-    return knex.schema.dropTable("channel_post").dropTable("episode").dropTable("anime_info").dropTable("anime");
+    return knex.schema.dropTable("channel_post").dropTable("episode").dropTable("dub").dropTable("anime_info").dropTable("anime");
 };
