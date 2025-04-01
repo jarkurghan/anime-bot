@@ -46,22 +46,22 @@ const selectAnime = async (ctx) => {
             }
         } else {
             // ------ send dub list ---
-            const dub = await db("episode").leftJoin("dub", "dub.id", "episode.dub").select("dub.name", "episode").where({ anime_id: animeID });
-            const groupedDub = dub.reduce((acc, item) => {
-                item.episode = item.episode.replace("-qism", "").replace("-fasl ", "-").replace("-mavsum ", "-");
-                if (!acc[item.name]) acc[item.name] = [];
-                acc[item.name].push(item.episode);
-                return acc;
-            }, {});
+            // const dub = await db("episode").leftJoin("dub", "dub.id", "episode.dub").select("dub.name", "episode").where({ anime_id: animeID });
+            // const groupedDub = dub.reduce((acc, item) => {
+            //     item.episode = item.episode.replace("-qism", "").replace("-fasl ", "-").replace("-mavsum ", "-");
+            //     if (!acc[item.name]) acc[item.name] = [];
+            //     acc[item.name].push(item.episode);
+            //     return acc;
+            // }, {});
 
-            let message = "<b>" + anime.name + "</b>. Dublaj studiyalari va tarjima qilingan qismlar:\n\n";
-            const sortedDub = Object.entries(groupedDub).sort((a, b) => Math.min(...a[1]) - Math.min(...b[1]));
+            // let message = "<b>" + anime.name + "</b>. Dublaj studiyalari va tarjima qilingan qismlar:\n\n";
+            // const sortedDub = Object.entries(groupedDub).sort((a, b) => Math.min(...a[1]) - Math.min(...b[1]));
 
-            for (const [dub, qismlar] of sortedDub) {
-                const sortedQismlar = qismlar.sort((a, b) => a - b);
-                message += `🎙 <b>${dub}</b>: ${sortedQismlar.join(", ")}\n`;
-            }
-            await ctx.replyWithHTML(message);
+            // for (const [dub, qismlar] of sortedDub) {
+            //     const sortedQismlar = qismlar.sort((a, b) => a - b);
+            //     message += `🎙 <b>${dub}</b>: ${sortedQismlar.join(", ")}\n`;
+            // }
+            // await ctx.replyWithHTML(message);
 
             // ------ send episode list ---
             const { textList, buttons } = await renderEpisodePage(animeID, 0);
@@ -126,10 +126,41 @@ const selectEpisode = async (ctx) => {
     }
 };
 
+const selectAllEpisode = async (ctx) => {
+    try {
+        const id1 = Number(ctx.match[1]);
+        const id2 = Number(ctx.match[2]);
+        const channel = process.env.CHANNEL_ID;
+
+        const userId = ctx.from.id;
+        const user = await db("user").where({ user_id: userId }).first();
+        if (!user) return ctx.reply("❌ Foydalanuvchi ma'lumotlari topilmadi. Iltimos, /start buyrug'ini bosing.");
+
+        const episodes = await db("episode").where("id", ">=", id1).andWhere("id", "<=", id2);
+        if (episodes.length === 0) return ctx.reply("❌ Topilmadi!");
+
+        for (let i = 0; i < episodes.length; i++) {
+            const episode = episodes[i];
+            const allDub = await db("episode").where({ anime_id: episode.anime_id, episode: episode.episode });
+            for (let j = 0; j < allDub.length; j++) {
+                const posts = await db("channel_post").where({ episode_id: allDub[j].id });
+                for (let k = 0; k < posts.length; k++) {
+                    await ctx.telegram.copyMessage(ctx.chat.id, channel, posts[k].post_id);
+                }
+            }
+        }
+
+        const buttons = [[Markup.button.callback("📄 Qismlar ro'yxati", "episode_list")], [Markup.button.callback("📂 Animelar ro'yxati", "anime_list")]];
+        await ctx.reply("Quyidagi menulardan birini tanlang 👇", { parse_mode: "HTML", ...Markup.inlineKeyboard(buttons) });
+        await ctx.deleteMessage();
+    } catch (err) {
+        console.error(err);
+        ctx.reply("❌ Xatolik yuz berdi. Iltimos, keyinroq urinib ko'ring.");
+    }
+};
+
 const backToAnime = async (ctx) => {
     try {
-        console.log(1);
-
         const user = await db("user").where("user_id", ctx.from.id).first();
         if (!user) return ctx.reply("❌ Foydalanuvchi ma'lumotlari topilmadi. Iltimos, /start buyrug'ini bosing.");
         const page = await db("user_page").where("user_id", user.id);
@@ -200,4 +231,4 @@ async function watch(ctx) {
     }
 }
 
-module.exports = { renderAnimePage, changePage, selectAnime, selectEpisode, episodePage, backToAnime, animeList, episodeList, watch };
+module.exports = { renderAnimePage, changePage, selectAnime, selectEpisode, selectAllEpisode, episodePage, backToAnime, animeList, episodeList, watch };

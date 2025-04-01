@@ -77,6 +77,10 @@ const renderEpisodePage = async (animeId, page) => {
         buttons[rowIndex].push(button);
     });
 
+    const text = `${page * pageSize + 1}-${page * pageSize + currentPage.length}` + "   barchasini tanlash";
+    const query = "all_episode_" + currentPage[0].id + "_" + currentPage[currentPage.length - 1].id;
+    buttons.push([Markup.button.callback(text, query)]);
+
     const navigationButtons = [];
     if (page > 0) {
         navigationButtons.push(Markup.button.callback("⬅️ Oldingi", `elist_${animeId}_${page - 1}`));

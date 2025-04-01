@@ -14,12 +14,14 @@ const { selectAnime } = require("./src/methods.js");
 const { animeList } = require("./src/methods.js");
 const { episodeList } = require("./src/methods.js");
 const { sendDataToAdmin } = require("./src/scheduler.js");
+const { selectAllEpisode } = require("./src/methods.js");
 
 bot.start(start);
 bot.action(/^anime_(\d+)$/, handleMessage, selectAnime);
 bot.action(/^anime_list_(\d+)$/, handleMessage, changePage);
 bot.action(/^back_anime_list$/, handleMessage, backToAnime);
 bot.action(/^episode_(\d+)$/, handleMessage, selectEpisode);
+bot.action(/^all_episode_(\d+)_(\d+)$/, handleMessage, selectAllEpisode);
 bot.action(/^elist_(\d+)_(\d+)$/, handleMessage, episodePage);
 bot.action(/^episode_list$/, handleMessage, episodeList);
 bot.action(/^anime_list$/, handleMessage, animeList);
