@@ -2,6 +2,7 @@ const { Telegraf, Markup } = require("telegraf");
 const db = require("../db/db");
 const { checkSubscription } = require("./check-subscription");
 const { renderAnimePage } = require("./methods");
+const { sendManga } = require("./manga");
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -47,6 +48,10 @@ async function start(ctx) {
     }
 
     //------------------------------- response ---------------------------------
+    if (ctx.startPayload && ctx.startPayload.slice(0, 5) === "manga") {
+        const manga = await sendManga(ctx);
+        if (manga) return;
+    }
 
     const page = existingUser ? await db("user_page").where({ user_id: existingUser.id }).first().page : 0;
     const { textList, buttons } = await renderAnimePage(page);
