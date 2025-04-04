@@ -30,8 +30,8 @@ bot.start(start);
 
 //         // console.log(`Kanalda yangi post: ${messageId}`);
 
-//         await bot.telegram.editMessageText("-1002320099794", messageId, null, originalText, {
-//             reply_markup: { inline_keyboard: [[{ text: "Yuklab olish", url: `https://t.me/aniuz_bot?start=manga_boruto_997` }]] },
+//         await bot.telegram.editMessageText("-1002198562196", messageId, null, originalText, {
+//             reply_markup: { inline_keyboard: [[{ text: "Botga o'tish", url: `https://t.me/aniuz_bot?start=channel` }]] },
 //             parse_mode: "HTML",
 //         });
 
@@ -40,21 +40,6 @@ bot.start(start);
 //         console.error("Postni tahrirlashda xato:", error.message);
 //     }
 // });
-
-// async function sendPostToChannel() {
-//     try {
-//         const postContent = `🎉 Yangi post!\n\nBu post tagida botga o'tish tugmasi mavjud.`;
-//         const postUid = `${Date.now()}`;
-//         const keyboard = { inline_keyboard: [[{ text: "Botga kirish", url: `https://t.me/aniuz_bot?start=anime_100${postUid}` }]] };
-
-//         const sentMessage = await bot.telegram.sendMessage(process.env.CHANNEL_ID, postContent, { reply_markup: keyboard, parse_mode: "Markdown" });
-
-//         return sentMessage;
-//     } catch (error) {
-//         console.error(error);
-//         throw error;
-//     }
-// }
 
 bot.action(/^anime_(\d+)$/, handleMessage, selectAnime);
 bot.action(/^anime_list_(\d+)$/, handleMessage, changePage);
