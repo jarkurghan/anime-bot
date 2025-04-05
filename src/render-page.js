@@ -24,7 +24,8 @@ const renderAnimePage = async (page = 0) => {
     //         anime.episode_count
     //     } qism</i>`;
     const listMaker = (anime, index) => `<i>${index + 1 + page * pageSize}. ${anime.name}</i>`;
-    const textList = `<b>Animelar ro'yxati: ${page * pageSize + 1}-${page * pageSize + currentPage.length}</b>\n\n` + currentPage.map(listMaker).join("\n");
+    const textList = `<b>Animelar ro'yxati: ${page * pageSize + 1}-${page * pageSize + currentPage.length}</b>\n\n` + currentPage.map(listMaker).join("\n")+
+        "\n\n<blockquote>Bot yangiliklaridan xabardor bo'lish uchun @ani_uz_news kanaliga a'zo bo'ling!</blockquote>";
     // "\n\nBu yerda sizning reklamangiz bo'lishi mumkin edi!";
 
     const buttons = [];
@@ -65,8 +66,8 @@ const renderEpisodePage = async (animeId, page) => {
     const currentPage = getPage(page);
     const textList =
         `<b>${anime.name}: ${page * pageSize + 1}-${page * pageSize + currentPage.length}</b> \nUmumiy ${episodeList.length} qism\n\n` +
-        currentPage.map((episode, i) => `<i>${page * pageSize + 1 + i}. <b>${episode.episode}</b>. ${episode.name}</i>`).join("\n");
-    // + "\n\n<blockquote>Bot yangiliklaridan xabardor bo'lish uchun @ani_uz_news kanaliga a'zo bo'ling!</blockquote>";
+        currentPage.map((episode, i) => `<i>${page * pageSize + 1 + i}. <b>${episode.episode}</b>. ${episode.name}</i>`).join("\n") +
+        "\n\n<blockquote>Bot yangiliklaridan xabardor bo'lish uchun @ani_uz_news kanaliga a'zo bo'ling!</blockquote>";
     // "\n\nBu yerda sizning reklamangiz bo'lishi mumkin edi!";
 
     const buttons = [];
