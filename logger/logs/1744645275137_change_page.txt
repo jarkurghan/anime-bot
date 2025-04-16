@@ -1,0 +1,13 @@
+2025-04-14T15:41:15.137Z
+
+ReferenceError: Cannot access 'navigationButtons' before initialization
+    at renderMangaPage (C:\Users\NajmiddinNazirov\Documents\newFolder\manga-bot\src\render-page.js:42:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async search (C:\Users\NajmiddinNazirov\Documents\newFolder\manga-bot\src\methods.js:14:43)
+    at async execute (C:\Users\NajmiddinNazirov\Documents\newFolder\manga-bot\node_modules\telegraf\lib\composer.js:518:17)
+    at async C:\Users\NajmiddinNazirov\Documents\newFolder\manga-bot\node_modules\telegraf\lib\composer.js:519:21
+    at async execute (C:\Users\NajmiddinNazirov\Documents\newFolder\manga-bot\node_modules\telegraf\lib\composer.js:518:17)
+    at async C:\Users\NajmiddinNazirov\Documents\newFolder\manga-bot\node_modules\telegraf\lib\composer.js:519:21
+    at async execute (C:\Users\NajmiddinNazirov\Documents\newFolder\manga-bot\node_modules\telegraf\lib\composer.js:518:17)
+    at async C:\Users\NajmiddinNazirov\Documents\newFolder\manga-bot\node_modules\telegraf\lib\composer.js:519:21
+    at async execute (C:\Users\NajmiddinNazirov\Documents\newFolder\manga-bot\node_modules\telegraf\lib\composer.js:518:17)

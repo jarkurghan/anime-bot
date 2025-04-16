@@ -1,0 +1,12 @@
+2025-04-15T03:30:00.035Z
+
+error: insert into "user" ("first_name", "last_name", "user_id", "username") values ($1, $2, $3, $4) returning * - duplicate key value violates unique constraint "user_user_id_unique"
+    at Parser.parseErrorMessage (C:\Users\NajmiddinNazirov\Documents\newFolder\manga-bot\node_modules\pg-protocol\dist\parser.js:283:98)
+    at Parser.handlePacket (C:\Users\NajmiddinNazirov\Documents\newFolder\manga-bot\node_modules\pg-protocol\dist\parser.js:122:29)
+    at Parser.parse (C:\Users\NajmiddinNazirov\Documents\newFolder\manga-bot\node_modules\pg-protocol\dist\parser.js:35:38)
+    at Socket.<anonymous> (C:\Users\NajmiddinNazirov\Documents\newFolder\manga-bot\node_modules\pg-protocol\dist\index.js:11:42)
+    at Socket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TCP.onStreamRead (node:internal/stream_base_commons:189:23)

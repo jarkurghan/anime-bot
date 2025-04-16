@@ -2,6 +2,7 @@ const schedule = require("node-schedule");
 const fs = require("fs");
 const path = require("path");
 const db = require("../db/db");
+const { logError } = require("../logger");
 
 const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID;
 
@@ -32,8 +33,9 @@ const sendDataToAdmin = (bot) => {
 
             console.log("✅ scheduler");
         } catch (error) {
-            console.error("❌ scheduler error:");
-            console.error(error);
+            console.error(error.message);
+            logError("scheduler", error);
+            ctx.reply("❌ Xatolik yuz berdi. Iltimos, dasturchiga xabar bering.");
         }
     });
 };

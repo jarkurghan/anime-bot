@@ -3,6 +3,7 @@ const db = require("../db/db");
 const { checkSubscription } = require("./check-subscription");
 const { renderAnimePage } = require("./methods");
 const { sendManga } = require("./manga");
+const { logError } = require("../logger");
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -27,8 +28,10 @@ async function createUserDB(ctx) {
                     `🆔 ID: ${user_id}`
             );
         }
-    } catch (err) {
-        console.error("❌ Foydalanuvchini saqlashda xatolik:", err);
+    } catch (error) {
+        console.error(error.message);
+        logError("start_add_user", error);
+        ctx.reply("❌ Xatolik yuz berdi. Iltimos, dasturchiga xabar bering.");
     }
 }
 

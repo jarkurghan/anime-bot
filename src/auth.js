@@ -1,5 +1,6 @@
 const { actions } = require("..");
 const db = require("../db/db");
+const { logError } = require("../logger");
 const { checkSubscription } = require("./check-subscription");
 const { Markup } = require("telegraf");
 
@@ -25,8 +26,10 @@ async function handleMessage(ctx, next) {
     //                 `🆔 ID: ${user_id}`
     //         );
     //     }
-    // } catch (err) {
-    //     console.error("❌ Foydalanuvchini saqlashda xatolik:", err);
+    // } catch (error) {
+    //     console.error(error.message);
+    //     logError("handle_message", error);
+    //     ctx.reply("❌ Xatolik yuz berdi. Iltimos, dasturchiga xabar bering.");
     // }
 
     //------------------------------- insert db ---------------------------------

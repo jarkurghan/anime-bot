@@ -2,6 +2,7 @@ const { Markup } = require("telegraf");
 const { renderEpisodePage } = require("./render-page");
 const { renderAnimePage } = require("./render-page");
 const db = require("../db/db");
+const { logError } = require("../logger");
 
 const changePage = async (ctx) => {
     try {
@@ -13,9 +14,10 @@ const changePage = async (ctx) => {
         const { textList, buttons } = await renderAnimePage(page);
         const keyboard = Markup.inlineKeyboard(buttons);
         await ctx.editMessageText(textList, { parse_mode: "HTML", ...keyboard });
-    } catch (err) {
-        console.error(err);
-        ctx.reply("❌ Xatolik yuz berdi. Iltimos, keyinroq urinib ko'ring.");
+    } catch (error) {
+        console.error(error.message);
+        logError("change_page", error);
+        ctx.reply("❌ Xatolik yuz berdi. Iltimos, dasturchiga xabar bering.");
     }
 };
 
@@ -70,9 +72,10 @@ const selectAnime = async (ctx) => {
         }
 
         ctx.deleteMessage();
-    } catch (err) {
-        console.error(err);
-        ctx.reply("❌ Xatolik yuz berdi. Iltimos, keyinroq urinib ko'ring.");
+    } catch (error) {
+        console.error(error.message);
+        logError("select_anime", error);
+        ctx.reply("❌ Xatolik yuz berdi. Iltimos, dasturchiga xabar bering.");
     }
 };
 
@@ -87,9 +90,10 @@ const episodePage = async (ctx) => {
         const { textList, buttons } = await renderEpisodePage(anime, page);
         const keyboard = Markup.inlineKeyboard(buttons);
         await ctx.editMessageText(textList, { parse_mode: "HTML", ...keyboard });
-    } catch (err) {
-        console.error(err);
-        ctx.reply("❌ Xatolik yuz berdi. Iltimos, keyinroq urinib ko'ring.");
+    } catch (error) {
+        console.error(error.message);
+        logError("episode_page", error);
+        ctx.reply("❌ Xatolik yuz berdi. Iltimos, dasturchiga xabar bering.");
     }
 };
 
@@ -120,9 +124,10 @@ const selectEpisode = async (ctx) => {
             await ctx.reply(text, buttonOptions);
             await ctx.deleteMessage();
         }
-    } catch (err) {
-        console.error(err);
-        ctx.reply("❌ Xatolik yuz berdi. Iltimos, keyinroq urinib ko'ring.");
+    } catch (error) {
+        console.error(error.message);
+        logError("select_episode", error);
+        ctx.reply("❌ Xatolik yuz berdi. Iltimos, dasturchiga xabar bering.");
     }
 };
 
@@ -153,9 +158,10 @@ const selectAllEpisode = async (ctx) => {
         const buttons = [[Markup.button.callback("📄 Qismlar ro'yxati", "episode_list")], [Markup.button.callback("📂 Animelar ro'yxati", "anime_list")]];
         await ctx.reply("Quyidagi menulardan birini tanlang 👇", { parse_mode: "HTML", ...Markup.inlineKeyboard(buttons) });
         await ctx.deleteMessage();
-    } catch (err) {
-        console.error(err);
-        ctx.reply("❌ Xatolik yuz berdi. Iltimos, keyinroq urinib ko'ring.");
+    } catch (error) {
+        console.error(error.message);
+        logError("select_all_episode", error);
+        ctx.reply("❌ Xatolik yuz berdi. Iltimos, dasturchiga xabar bering.");
     }
 };
 
@@ -170,9 +176,10 @@ const backToAnime = async (ctx) => {
         await ctx.reply(textList, { parse_mode: "HTML", ...keyboard });
 
         ctx.deleteMessage();
-    } catch (err) {
-        console.error(err);
-        ctx.reply("❌ Xatolik yuz berdi. Iltimos, keyinroq urinib ko'ring.");
+    } catch (error) {
+        console.error(error.message);
+        logError("back_to_anime", error);
+        ctx.reply("❌ Xatolik yuz berdi. Iltimos, dasturchiga xabar bering.");
     }
 };
 
@@ -185,9 +192,10 @@ const animeList = async (ctx) => {
         const keyboard = Markup.inlineKeyboard(buttons);
         await ctx.reply(textList, { parse_mode: "HTML", ...keyboard });
         await ctx.deleteMessage();
-    } catch (err) {
-        console.error(err);
-        ctx.reply("❌ Xatolik yuz berdi. Iltimos, keyinroq urinib ko'ring.");
+    } catch (error) {
+        console.error(error.message);
+        logError("anime_list", error);
+        ctx.reply("❌ Xatolik yuz berdi. Iltimos, dasturchiga xabar bering.");
     }
 };
 
@@ -200,9 +208,10 @@ const episodeList = async (ctx) => {
         const keyboard = Markup.inlineKeyboard(buttons);
         await ctx.reply(textList, { parse_mode: "HTML", ...keyboard });
         await ctx.deleteMessage();
-    } catch (err) {
-        console.error(err);
-        ctx.reply("❌ Xatolik yuz berdi. Iltimos, keyinroq urinib ko'ring.");
+    } catch (error) {
+        console.error(error.message);
+        logError("episode_list", error);
+        ctx.reply("❌ Xatolik yuz berdi. Iltimos, dasturchiga xabar bering.");
     }
 };
 
@@ -225,9 +234,10 @@ async function watch(ctx) {
 
         const buttons = [[Markup.button.callback("📄 Qismlar ro'yxati", "episode_list")], [Markup.button.callback("📂 Animelar ro'yxati", "anime_list")]];
         await ctx.reply("Quyidagi menulardan birini tanlang 👇", { parse_mode: "HTML", ...Markup.inlineKeyboard(buttons) });
-    } catch (err) {
-        console.error(err);
-        ctx.reply("❌ Xatolik yuz berdi. Iltimos, keyinroq urinib ko'ring.");
+    } catch (error) {
+        console.error(error.message);
+        logError("watch", error);
+        ctx.reply("❌ Xatolik yuz berdi. Iltimos, dasturchiga xabar bering.");
     }
 }
 

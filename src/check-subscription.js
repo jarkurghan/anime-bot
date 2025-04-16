@@ -1,3 +1,4 @@
+const { logError } = require("../logger");
 const requiredChannels = [{ username: process.env.MY_CHANNEL_USERNAME, name: process.env.MY_CHANNEL_NAME }];
 
 async function checkSubscription(ctx) {
@@ -11,7 +12,9 @@ async function checkSubscription(ctx) {
     //             notSubscribed.push(channel);
     //         }
     //     } catch (error) {
-    //         console.error(`Kanal tekshirib bo'lmadi: ${channel.username}`, error);
+    //         console.error(error.message);
+    //         logError("subscribe", error);
+    //         ctx.reply("❌ Xatolik yuz berdi. Iltimos, dasturchiga xabar bering.");
     //     }
     // }
 
