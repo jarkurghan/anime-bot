@@ -1,9 +1,9 @@
 const { Markup } = require("telegraf");
-const db = require("../db/db");
+const knex = require("../db/db");
 
 const renderAnimePage = async (page = 0) => {
     const pageSize = 10;
-    const animeList = await db("anime");
+    const animeList = await knex("anime");
     // .leftJoin("episode", "anime.id", "episode.anime_id")
     // .select("anime.id", "anime.name", "anime.number_of_episode")
     // .count("episode.episode as episode_count")
@@ -55,8 +55,15 @@ const renderAnimePage = async (page = 0) => {
 
 const renderEpisodePage = async (animeId, page) => {
     const pageSize = 10;
-    const episodeList = await db("episode").select("id", "episode", "name").where("anime_id", animeId).groupBy("episode").orderBy("id");
-    const anime = await db("anime").select("id", "name").where("id", animeId).first();
+    // const episodeList = await knex("episode").select("id", "episode", "name").where("anime_id", animeId).groupBy("episode").orderBy("id");
+    const anime = await knex("anime").select("id", "name").where("id", animeId).first();
+    const episodeList = await knex("episode")
+        .select("id", "name", "episode")
+        .where("anime_id", animeId)
+        .whereIn("id", function () {
+            this.select(knex.raw("MIN(id)")).from("episode").groupBy("episode");
+        })
+        .orderBy("id", "asc");
 
     const totalPages = Math.ceil(episodeList.length / pageSize);
 

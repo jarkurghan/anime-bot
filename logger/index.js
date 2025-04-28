@@ -6,7 +6,7 @@ function logError(command, error) {
         const logsDir = path.join(__dirname, "logs");
         if (!fs.existsSync(logsDir)) fs.mkdirSync(logsDir);
 
-        const logFilePath = path.join(logsDir, `${new Date().getTime()}_${command}.txt`);
+        const logFilePath = path.join(logsDir, `${new Date().getTime()}_${command}.log`);
         const logMessage = `${new Date().toISOString()}\n\n${error.stack}`;
 
         fs.appendFileSync(logFilePath, logMessage, "utf8");
