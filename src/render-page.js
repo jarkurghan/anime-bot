@@ -24,7 +24,9 @@ const renderAnimePage = async (page = 0) => {
     //         anime.episode_count
     //     } qism</i>`;
     const listMaker = (anime, index) => `<i>${index + 1 + page * pageSize}. ${anime.name}</i>`;
-    const textList = `<b>Animelar ro'yxati: ${page * pageSize + 1}-${page * pageSize + currentPage.length}</b>\n\n` + currentPage.map(listMaker).join("\n")+
+    const textList =
+        `<b>Animelar ro'yxati: ${page * pageSize + 1}-${page * pageSize + currentPage.length}</b>\n\n` +
+        currentPage.map(listMaker).join("\n") +
         "\n\n<blockquote>Bot yangiliklaridan xabardor bo'lish uchun @ani_uz_news kanaliga a'zo bo'ling!</blockquote>";
     // "\n\nBu yerda sizning reklamangiz bo'lishi mumkin edi!";
 
@@ -47,6 +49,7 @@ const renderAnimePage = async (page = 0) => {
         buttons.push(navigationButtons);
     }
 
+    if (animeList.length === 0) return { textList: "<b>Anime topilmadi!</b>", buttons };
     return { textList, buttons };
 };
 
