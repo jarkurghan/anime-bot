@@ -1,14 +1,14 @@
 const { Markup } = require("telegraf");
 const knex = require("../db/db");
 
-const renderAnimePage = async (page = 0) => {
+const renderAnimePage = async (page = 0, search = "") => {
     const pageSize = 10;
-    const animeList = await knex("anime");
-    // .leftJoin("episode", "anime.id", "episode.anime_id")
-    // .select("anime.id", "anime.name", "anime.number_of_episode")
-    // .count("episode.episode as episode_count")
-    // .groupBy("anime.id")
-    // .orderBy("anime.id");
+    const animeList = await knex("anime").where((qb) => {
+        if (search) {
+            qb.where("anime.name", "ILIKE", `%${search}%`);
+            qb.orWhere("anime.keys", "ILIKE", `%${search}%`);
+        }
+    });
 
     const totalPages = Math.ceil(animeList.length / pageSize);
 
@@ -39,15 +39,10 @@ const renderAnimePage = async (page = 0) => {
     });
 
     const navigationButtons = [];
-    if (page > 0) {
-        navigationButtons.push(Markup.button.callback("⬅️ Oldingi", `anime_list_${page - 1}`));
-    }
-    if (page < totalPages - 1) {
-        navigationButtons.push(Markup.button.callback("Keyingi ➡️", `anime_list_${page + 1}`));
-    }
-    if (navigationButtons.length > 0) {
-        buttons.push(navigationButtons);
-    }
+    if (page > 0) navigationButtons.push(Markup.button.callback("⬅️ Oldingi", `anime_list_${page - 1}`));
+    if (search) navigationButtons.push(Markup.button.callback("❌", "remove_searching"));
+    if (page < totalPages - 1) navigationButtons.push(Markup.button.callback("Keyingi ➡️", `anime_list_${page + 1}`));
+    if (navigationButtons.length > 0) buttons.push(navigationButtons);
 
     if (animeList.length === 0) return { textList: "<b>Anime topilmadi!</b>", buttons };
     return { textList, buttons };
@@ -61,7 +56,7 @@ const renderEpisodePage = async (animeId, page) => {
         .select("id", "name", "episode")
         .where("anime_id", animeId)
         .whereIn("id", function () {
-            this.select(knex.raw("MIN(id)")).from("episode").groupBy("episode");
+            this.select(knex.raw("MIN(id)")).from("episode").where("anime_id", animeId).groupBy("episode");
         })
         .orderBy("id", "asc");
 

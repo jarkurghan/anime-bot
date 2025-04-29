@@ -1,17 +1,49 @@
 const { Markup } = require("telegraf");
 const { renderEpisodePage } = require("./render-page");
 const { renderAnimePage } = require("./render-page");
-const db = require("../db/db");
 const { logError } = require("../logger");
+const knex = require("../db/db");
+
+const search = async (ctx) => {
+    try {
+        if (ctx.message.chat.type === "private") {
+            const message = ctx.message.text;
+            const user = await knex("user").where("user_id", ctx.from.id).first();
+            if (!user) return ctx.reply("❌ Foydalanuvchi ma'lumotlari topilmadi. Iltimos, /start buyrug'ini bosing.");
+            await knex("user_page").where("user_id", user.id).update({ anime_page: 0, episode_page: 0, searching: message });
+            const { textList, buttons } = await renderAnimePage(0, message);
+            const keyboard = Markup.inlineKeyboard(buttons);
+            await ctx.reply(textList, { parse_mode: "HTML", ...keyboard });
+        }
+    } catch (error) {
+        console.error(error.message);
+        logError("search", error);
+        ctx.reply("❌ Xatolik yuz berdi. Iltimos, dasturchiga xabar bering.");
+    }
+};
+
+const reserFilter = async (ctx) => {
+    try {
+        const user = await knex("user").where("user_id", ctx.from.id).first();
+        if (!user) return ctx.reply("❌ Foydalanuvchi ma'lumotlari topilmadi. Iltimos, /start buyrug'ini bosing.");
+        await knex("user_page").where("user_id", user.id).update({ anime_page: 0, episode_page: 0, searching: "" });
+        const { textList, buttons } = await renderAnimePage(0, "");
+        await ctx.editMessageText(textList, { parse_mode: "HTML", ...Markup.inlineKeyboard(buttons) });
+    } catch (error) {
+        console.error(error.message);
+        logError("change_page", error);
+        ctx.reply("❌ Xatolik yuz berdi. Iltimos, keyinroq urinib ko'ring.");
+    }
+};
 
 const changePage = async (ctx) => {
     try {
         const page = parseInt(ctx.match[1]);
-        const user = await db("user").where("user_id", ctx.from.id).first();
+        const user = await knex("user").where("user_id", ctx.from.id).first();
         if (!user) return ctx.reply("❌ Foydalanuvchi ma'lumotlari topilmadi. Iltimos, /start buyrug'ini bosing.");
-        await db("user_page").where("user_id", user.id).update({ anime_page: page });
+        const userPage = await knex("user_page").where("user_id", user.id).update({ anime_page: page }).returning("*");
 
-        const { textList, buttons } = await renderAnimePage(page);
+        const { textList, buttons } = await renderAnimePage(page, userPage[0].searching);
         const keyboard = Markup.inlineKeyboard(buttons);
         await ctx.editMessageText(textList, { parse_mode: "HTML", ...keyboard });
     } catch (error) {
@@ -24,18 +56,18 @@ const changePage = async (ctx) => {
 const selectAnime = async (ctx) => {
     try {
         const animeID = parseInt(ctx.match[1]);
-        const user = await db("user").where("user_id", ctx.from.id).first();
+        const user = await knex("user").where("user_id", ctx.from.id).first();
         if (!user) return ctx.reply("❌ Foydalanuvchi ma'lumotlari topilmadi. Iltimos, /start buyrug'ini bosing.");
-        await db("user_page").where("user_id", user.id).update({ anime_id: animeID, episode_page: 0 });
+        await knex("user_page").where("user_id", user.id).update({ anime_id: animeID, episode_page: 0 });
 
-        const anime = await db("anime").where("id", animeID).first();
+        const anime = await knex("anime").where("id", animeID).first();
         if (anime.number_of_episode === 1) {
             const channel = process.env.CHANNEL_ID;
-            const post = await db("episode").where("anime_id", animeID).first();
+            const post = await knex("episode").where("anime_id", animeID).first();
 
-            const allDub = await db("episode").where({ anime_id: post.anime_id, episode: post.episode });
+            const allDub = await knex("episode").where({ anime_id: post.anime_id, episode: post.episode });
             if (allDub.length === 1) {
-                const posts = await db("channel_post").where({ episode_id: allDub[0].id });
+                const posts = await knex("channel_post").where({ episode_id: allDub[0].id });
                 for (let i = 0; i < posts.length; i++) await ctx.telegram.copyMessage(ctx.chat.id, channel, posts[i].post_id);
 
                 const buttons = [[Markup.button.callback("📂 Animelar ro'yxati", "anime_list")]];
@@ -83,9 +115,9 @@ const episodePage = async (ctx) => {
     try {
         const anime = parseInt(ctx.match[1]);
         const page = parseInt(ctx.match[2]);
-        const user = await db("user").where("user_id", ctx.from.id).first();
+        const user = await knex("user").where("user_id", ctx.from.id).first();
         if (!user) return ctx.reply("❌ Foydalanuvchi ma'lumotlari topilmadi. Iltimos, /start buyrug'ini bosing.");
-        await db("user_page").where("user_id", user.id).update({ episode_page: page });
+        await knex("user_page").where("user_id", user.id).update({ episode_page: page });
 
         const { textList, buttons } = await renderEpisodePage(anime, page);
         const keyboard = Markup.inlineKeyboard(buttons);
@@ -103,15 +135,15 @@ const selectEpisode = async (ctx) => {
         const channel = process.env.CHANNEL_ID;
 
         const userId = ctx.from.id;
-        const user = await db("user").where({ user_id: userId }).first();
+        const user = await knex("user").where({ user_id: userId }).first();
         if (!user) return ctx.reply("❌ Foydalanuvchi ma'lumotlari topilmadi. Iltimos, /start buyrug'ini bosing.");
 
-        const episode = await db("episode").where({ id }).first();
+        const episode = await knex("episode").where({ id }).first();
         if (!episode) return ctx.reply("❌ Topilmadi!");
 
-        const allDub = await db("episode").where({ anime_id: episode.anime_id, episode: episode.episode });
+        const allDub = await knex("episode").where({ anime_id: episode.anime_id, episode: episode.episode });
         if (allDub.length === 1) {
-            const posts = await db("channel_post").where({ episode_id: allDub[0].id });
+            const posts = await knex("channel_post").where({ episode_id: allDub[0].id });
             for (let i = 0; i < posts.length; i++) await ctx.telegram.copyMessage(ctx.chat.id, channel, posts[i].post_id);
 
             const buttons = [[Markup.button.callback("📄 Qismlar ro'yxati", "episode_list")], [Markup.button.callback("📂 Animelar ro'yxati", "anime_list")]];
@@ -138,17 +170,17 @@ const selectAllEpisode = async (ctx) => {
         const channel = process.env.CHANNEL_ID;
 
         const userId = ctx.from.id;
-        const user = await db("user").where({ user_id: userId }).first();
+        const user = await knex("user").where({ user_id: userId }).first();
         if (!user) return ctx.reply("❌ Foydalanuvchi ma'lumotlari topilmadi. Iltimos, /start buyrug'ini bosing.");
 
-        const episodes = await db("episode").where("id", ">=", id1).andWhere("id", "<=", id2);
+        const episodes = await knex("episode").where("id", ">=", id1).andWhere("id", "<=", id2);
         if (episodes.length === 0) return ctx.reply("❌ Topilmadi!");
 
         for (let i = 0; i < episodes.length; i++) {
             const episode = episodes[i];
-            const allDub = await db("episode").where({ anime_id: episode.anime_id, episode: episode.episode });
+            const allDub = await knex("episode").where({ anime_id: episode.anime_id, episode: episode.episode });
             for (let j = 0; j < allDub.length; j++) {
-                const posts = await db("channel_post").where({ episode_id: allDub[j].id });
+                const posts = await knex("channel_post").where({ episode_id: allDub[j].id });
                 for (let k = 0; k < posts.length; k++) {
                     await ctx.telegram.copyMessage(ctx.chat.id, channel, posts[k].post_id);
                 }
@@ -167,13 +199,12 @@ const selectAllEpisode = async (ctx) => {
 
 const backToAnime = async (ctx) => {
     try {
-        const user = await db("user").where("user_id", ctx.from.id).first();
+        const user = await knex("user").where("user_id", ctx.from.id).first();
         if (!user) return ctx.reply("❌ Foydalanuvchi ma'lumotlari topilmadi. Iltimos, /start buyrug'ini bosing.");
-        const page = await db("user_page").where("user_id", user.id);
+        const page = await knex("user_page").where("user_id", user.id).first();
 
-        const { textList, buttons } = await renderAnimePage(page.anime_page);
-        const keyboard = Markup.inlineKeyboard(buttons);
-        await ctx.reply(textList, { parse_mode: "HTML", ...keyboard });
+        const { textList, buttons } = await renderAnimePage(page.anime_page, page.searching);
+        await ctx.reply(textList, { parse_mode: "HTML", ...Markup.inlineKeyboard(buttons) });
 
         ctx.deleteMessage();
     } catch (error) {
@@ -185,10 +216,10 @@ const backToAnime = async (ctx) => {
 
 const animeList = async (ctx) => {
     try {
-        const user = await db("user").where("user_id", ctx.from.id).first();
+        const user = await knex("user").where("user_id", ctx.from.id).first();
         if (!user) return ctx.reply("❌ Foydalanuvchi ma'lumotlari topilmadi. Iltimos, /start buyrug'ini bosing.");
-        const page = await db("user_page").where("user_id", user.id).first();
-        const { textList, buttons } = await renderAnimePage(page.anime_page);
+        const page = await knex("user_page").where("user_id", user.id).first();
+        const { textList, buttons } = await renderAnimePage(page.anime_page, page.searching);
         const keyboard = Markup.inlineKeyboard(buttons);
         await ctx.reply(textList, { parse_mode: "HTML", ...keyboard });
         await ctx.deleteMessage();
@@ -201,9 +232,9 @@ const animeList = async (ctx) => {
 
 const episodeList = async (ctx) => {
     try {
-        const user = await db("user").where("user_id", ctx.from.id).first();
+        const user = await knex("user").where("user_id", ctx.from.id).first();
         if (!user) return ctx.reply("❌ Foydalanuvchi ma'lumotlari topilmadi. Iltimos, /start buyrug'ini bosing.");
-        const page = await db("user_page").where("user_id", user.id).first();
+        const page = await knex("user_page").where("user_id", user.id).first();
         const { textList, buttons } = await renderEpisodePage(page.anime_id, page.episode_page);
         const keyboard = Markup.inlineKeyboard(buttons);
         await ctx.reply(textList, { parse_mode: "HTML", ...keyboard });
@@ -223,12 +254,12 @@ async function watch(ctx) {
         await ctx.deleteMessage();
 
         const userId = ctx.from.id;
-        const user = await db("user").where({ user_id: userId }).first();
+        const user = await knex("user").where({ user_id: userId }).first();
         if (!user) return ctx.reply("❌ Foydalanuvchi ma'lumotlari topilmadi. Iltimos, /start buyrug'ini bosing.");
 
-        const episode = await db("episode").where({ id }).first();
+        const episode = await knex("episode").where({ id }).first();
         if (episode) {
-            const posts = await db("channel_post").where({ episode_id: episode.id });
+            const posts = await knex("channel_post").where({ episode_id: episode.id });
             for (let i = 0; i < posts.length; i++) await ctx.telegram.copyMessage(ctx.chat.id, channel, posts[i].post_id);
         } else ctx.reply("❌ Topilmadi!");
 
@@ -241,4 +272,4 @@ async function watch(ctx) {
     }
 }
 
-module.exports = { renderAnimePage, changePage, selectAnime, selectEpisode, selectAllEpisode, episodePage, backToAnime, animeList, episodeList, watch };
+module.exports = { changePage, selectAnime, selectEpisode, selectAllEpisode, episodePage, backToAnime, animeList, episodeList, watch, search, reserFilter };

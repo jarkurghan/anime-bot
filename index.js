@@ -5,6 +5,8 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const { start } = require("./src/start");
 const { watch } = require("./src/methods.js");
+const { search } = require("./src/methods.js");
+const { reserFilter } = require("./src/methods.js");
 const { handleMessage } = require("./src/auth.js");
 const { episodePage } = require("./src/methods.js");
 const { selectEpisode } = require("./src/methods.js");
@@ -87,6 +89,8 @@ bot.action(/^elist_(\d+)_(\d+)$/, handleMessage, episodePage);
 bot.action(/^episode_list$/, handleMessage, episodeList);
 bot.action(/^anime_list$/, handleMessage, animeList);
 bot.action(/^watch_(.+)$/, handleMessage, watch);
+bot.action(/^remove_searching$/, reserFilter);
+bot.on("message", search);
 
 sendDataToAdmin(bot);
 
