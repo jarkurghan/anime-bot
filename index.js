@@ -20,80 +20,51 @@ const { sendDataToAdmin } = require("./src/scheduler.js");
 const { selectAllEpisode } = require("./src/methods.js");
 
 bot.start(start);
-// bot.on("channel_post", async (ctx) => {
-//     // const post = ctx.channelPost;
-//     // if (post.sender_chat.id == process.env.CHANNEL_ID && post.text === process.env.SENDKEY) {
-//     //     sendPostToChannel();
-//     // }
-
+// bot.command("changeanime", async (ctx) => {
 //     try {
-//         const messageId = ctx.channelPost.message_id;
-//         const originalText = ctx.channelPost.text || ctx.channelPost.caption || "";
-//         // console.log(ctx.channelPost);
+//         const adminChatId = process.env.ADMIN_CHAT_ID;
+//         const senderId = ctx.from.id;
+//         console.log(senderId);
 
-//         // console.log(`Kanalda yangi post: ${messageId}`);
+//         if (String(senderId) !== "6320204709") return ctx.reply("❌ Siz bu buyruqni bajarishga ruxsatga ega emassiz.");
 
-//         await bot.telegram.editMessageText("-1002198562196", messageId, null, originalText, {
-//             reply_markup: { inline_keyboard: [[{ text: "Botga o'tish", url: `https://t.me/aniuz_bot?start=channel` }]] },
-//             parse_mode: "HTML",
-//         });
+//         const commandParts = ctx.message.text.split(" ");
+//         if (commandParts.length < 4) return ctx.reply("❌ Noto'g'ri format. To'g'ri format: /changeanime <post1ID> <post2ID> <name>");
 
-//         console.log(`Post muvaffaqiyatli tahrirlandi: ${messageId}`);
+//         const post1ID = parseInt(commandParts[1], 10);
+//         const post2ID = parseInt(commandParts[2], 10);
+//         const name = commandParts.slice(3).join(" ");
+
+//         if (isNaN(post1ID) || isNaN(post2ID)) return ctx.reply("❌ post1ID va post2ID raqam bo'lishi kerak.");
+//         // const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+//         for (let postId = post1ID; postId <= post2ID; postId++) {
+//             try {
+//                 const message =
+//                     `<i>${name}\n<b>${postId - 1374}-qism</b>\n🎙 Anibla</i>\n\n@aniuz_bot\n` +
+//                     `<blockquote>Bot yangiliklaridan xabardor bo\'lish uchun @ani_uz_news kanaliga a\'zo bo\'ling!</blockquote>`;
+//                 await bot.telegram.editMessageCaption(process.env.CHANNEL_ID, postId, null, message, { parse_mode: "HTML" });
+//                 await new Promise((resolve) => setTimeout(resolve, 2100));
+//                 console.log(`✅ Post ${postId} muvaffaqiyatli o'zgartirildi.`);
+//             } catch (error) {
+//                 console.error(`❌ Post ${postId} o'zgartirilayotganda xato yuz berdi:`, error.message);
+//                 // if (error.message.includes("Too Many Requests")) {
+
+//                 //     await delay(60000);
+//                 //     postId--; // Qayta urinish uchun
+//                 // }
+//             }
+//             // if ((postId - post1ID + 1) % 20 === 0) await delay(43000);
+//         }
+
+//         // Javob qaytarish
+//         ctx.reply(`✅ Postlar ${post1ID} dan ${post2ID} gacha "${name}" matniga o'zgartirildi.`);
 //     } catch (error) {
-//         console.error("Postni tahrirlashda xato:", error.message);
+//         console.error("❌ Xatolik yuz berdi:", error.message);
+//         ctx.reply("❌ Xatolik yuz berdi. Iltimos, keyinroq urinib ko'ring.");
 //     }
 // });
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-bot.command("changeanime", async (ctx) => {
-    try {
-        const adminChatId = process.env.ADMIN_CHAT_ID;
-        const senderId = ctx.from.id;
-        console.log(senderId);
-
-        if (String(senderId) !== "6320204709") return ctx.reply("❌ Siz bu buyruqni bajarishga ruxsatga ega emassiz.");
-
-        const commandParts = ctx.message.text.split(" ");
-        if (commandParts.length < 4) return ctx.reply("❌ Noto'g'ri format. To'g'ri format: /changeanime <post1ID> <post2ID> <name>");
-
-        const post1ID = parseInt(commandParts[1], 10);
-        const post2ID = parseInt(commandParts[2], 10);
-        const name = commandParts.slice(3).join(" ");
-
-        if (isNaN(post1ID) || isNaN(post2ID)) return ctx.reply("❌ post1ID va post2ID raqam bo'lishi kerak.");
-        // const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-        for (let postId = post1ID; postId <= post2ID; postId++) {
-            try {
-                const message =
-                    `<i>${name}\n<b>${postId - 1374}-qism</b>\n🎙 Anibla</i>\n\n@aniuz_bot\n` +
-                    `<blockquote>Bot yangiliklaridan xabardor bo\'lish uchun @ani_uz_news kanaliga a\'zo bo\'ling!</blockquote>`;
-                await bot.telegram.editMessageCaption(process.env.CHANNEL_ID, postId, null, message, { parse_mode: "HTML" });
-                await new Promise((resolve) => setTimeout(resolve, 2100));
-                console.log(`✅ Post ${postId} muvaffaqiyatli o'zgartirildi.`);
-            } catch (error) {
-                console.error(`❌ Post ${postId} o'zgartirilayotganda xato yuz berdi:`, error.message);
-                // if (error.message.includes("Too Many Requests")) {
-
-                //     await delay(60000);
-                //     postId--; // Qayta urinish uchun
-                // }
-            }
-            // if ((postId - post1ID + 1) % 20 === 0) await delay(43000);
-        }
-
-        // Javob qaytarish
-        ctx.reply(`✅ Postlar ${post1ID} dan ${post2ID} gacha "${name}" matniga o'zgartirildi.`);
-    } catch (error) {
-        console.error("❌ Xatolik yuz berdi:", error.message);
-        ctx.reply("❌ Xatolik yuz berdi. Iltimos, keyinroq urinib ko'ring.");
-    }
-});
-
-// for (let i = 1375; i <= 1594; i++) {
-//     console.log(i - 1374, i);
-// }
-
+//  to-do: no forward message
 bot.action(/^anime_(\d+)$/, handleMessage, selectAnime);
 bot.action(/^anime_list_(\d+)$/, handleMessage, changePage);
 bot.action(/^back_anime_list$/, handleMessage, backToAnime);

@@ -144,7 +144,12 @@ const selectEpisode = async (ctx) => {
         const allDub = await knex("episode").where({ anime_id: episode.anime_id, episode: episode.episode });
         if (allDub.length === 1) {
             const posts = await knex("channel_post").where({ episode_id: allDub[0].id });
-            for (let i = 0; i < posts.length; i++) await ctx.telegram.copyMessage(ctx.chat.id, channel, posts[i].post_id);
+            for (let i = 0; i < posts.length; i++)
+                await ctx.telegram.copyMessage(ctx.chat.id, channel, posts[i].post_id).catch((error) => {
+                    console.error(error.message);
+                    logError("select_episode_" + episode.id, error);
+                    ctx.reply("❌ Topilmadi!");
+                });
 
             const buttons = [[Markup.button.callback("📄 Qismlar ro'yxati", "episode_list")], [Markup.button.callback("📂 Animelar ro'yxati", "anime_list")]];
             await ctx.reply("Quyidagi menulardan birini tanlang 👇", { parse_mode: "HTML", ...Markup.inlineKeyboard(buttons) });
@@ -182,7 +187,10 @@ const selectAllEpisode = async (ctx) => {
             for (let j = 0; j < allDub.length; j++) {
                 const posts = await knex("channel_post").where({ episode_id: allDub[j].id });
                 for (let k = 0; k < posts.length; k++) {
-                    await ctx.telegram.copyMessage(ctx.chat.id, channel, posts[k].post_id);
+                    await ctx.telegram.copyMessage(ctx.chat.id, channel, posts[k].post_id).catch((error) => {
+                        console.error(error.message);
+                        logError("select_all_episode_" + allDub[j].id, error);
+                    });
                 }
             }
         }
