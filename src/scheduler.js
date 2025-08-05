@@ -19,7 +19,7 @@ function countFilesInDirectory(directoryPath) {
 }
 
 const sendDataToAdmin = (bot) => {
-    const time = process.env.NODE_ENV === "production2" ? "20 0 * * *" : "10 0 * * *";
+    const time = "10 0 * * *";
     schedule.scheduleJob(time, async () => {
         try {
             const user = await knex("user").select("*");
