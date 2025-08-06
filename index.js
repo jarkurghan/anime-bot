@@ -1,4 +1,4 @@
-const env = process.env.NODE_ENV === "production" ? ".env.production" : process.env.NODE_ENV === "production2" ? ".env.production2" : ".env";
+const env = process.env.NODE_ENV === "production" ? ".env.production" : ".env";
 require("dotenv").config({ path: env });
 
 const { Telegraf } = require("telegraf");
@@ -18,8 +18,11 @@ const { animeList } = require("./src/methods.js");
 const { episodeList } = require("./src/methods.js");
 const { sendDataToAdmin } = require("./src/scheduler.js");
 const { selectAllEpisode } = require("./src/methods.js");
+const { sendUserActivity } = require("./src/scheduler.js");
+const { userActivity } = require("./src/middlewares.js");
 
 bot.start(start);
+bot.use(userActivity);
 // bot.command("changeanime", async (ctx) => {
 //     try {
 //         const adminChatId = process.env.ADMIN_CHAT_ID;
@@ -78,5 +81,6 @@ bot.action(/^remove_searching$/, reserFilter);
 bot.on("message", search);
 
 sendDataToAdmin(bot);
+sendUserActivity(bot);
 
 bot.launch();

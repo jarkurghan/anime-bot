@@ -6,5 +6,4 @@ logger/logs/*.log
 db/*.sqlite
 .env
 .env.production
-.env.production2
 drafts/
