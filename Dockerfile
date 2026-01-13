@@ -23,4 +23,4 @@ COPY --from=install /temp/prod/node_modules node_modules
 # run the app
 USER bun
 EXPOSE 3000/tcp
-ENTRYPOINT [ "bun", "run", "src/index.ts" ]
+ENTRYPOINT [ "bun", "run", "index.js" ]
