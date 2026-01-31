@@ -1,5 +1,4 @@
 const { actions } = require("..");
-const db = require("../db/db");
 const { logError } = require("../logger");
 const { checkSubscription } = require("./check-subscription");
 const { Markup } = require("telegraf");

@@ -1,17 +1,24 @@
-const user_db = require("../db/user-db");
+const { userDb } = require("../db/user-client");
+const { animeBot } = require("../db/schema");
+const { eq, and } = require("drizzle-orm");
 const { logError } = require("../logger");
 
 async function createUserDB(data) {
     try {
         const { date, tg_name, tg_user_id, tg_username } = data;
 
-        const existingUser = await user_db("anime_bot").where({ date, tg_user_id }).first();
+        const [existingUser] = await userDb
+            .select()
+            .from(animeBot)
+            .where(and(eq(animeBot.date, date), eq(animeBot.tgUserId, tg_user_id)))
+            .limit(1);
         if (!existingUser) {
-            await user_db("anime_bot").insert({ date, tg_name, tg_user_id, tg_username });
+            await userDb.insert(animeBot).values({ date, tgName: tg_name, tgUserId: tg_user_id, tgUsername: tg_username });
         } else {
-            await user_db("anime_bot")
-                .where({ date, tg_user_id })
-                .update({ clicked: existingUser.clicked + 1 });
+            await userDb
+                .update(animeBot)
+                .set({ clicked: (existingUser.clicked ?? 0) + 1 })
+                .where(and(eq(animeBot.date, date), eq(animeBot.tgUserId, tg_user_id)));
         }
     } catch (error) {
         console.error(error.message);

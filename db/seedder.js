@@ -1,43 +1,49 @@
-const knex = require("./db");
+const { pool } = require("./client");
 const path = require("path");
 const fs = require("fs");
+
+/** PostgreSQL jadval nomlari (user — rezerv so'z). */
+const TABLES = [
+    { file: "user", sql: '"user"' },
+    { file: "anime", sql: "anime" },
+    { file: "anime_info", sql: "anime_info" },
+    { file: "dub", sql: "dub" },
+    { file: "episode", sql: "episode" },
+    { file: "channel_post", sql: "channel_post" },
+    { file: "user_page", sql: "user_page" },
+];
 
 async function exportData() {
     try {
         const logsDir = path.join(__dirname, `seeds`);
         if (!fs.existsSync(logsDir)) fs.mkdirSync(logsDir);
 
-        const tables = ["user", "anime", "anime_info", "dub", "episode", "channel_post", "user_page"];
-        for (let i = 0; i < tables.length; i++) {
-            const table = tables[i];
+        for (let i = 0; i < TABLES.length; i++) {
+            const { file, sql: tableSql } = TABLES[i];
             try {
-                const data = await knex(table).select("*");
-                data.map((item) => delete item.id);
+                const { rows: data } = await pool.query(`SELECT * FROM ${tableSql}`);
+                data.forEach((item) => delete item.id);
                 await fs.promises.writeFile(
-                    `${logsDir}/${i + 1}_${table}.js`,
+                    `${logsDir}/${i + 1}_${file}.js`,
                     `/**
- * @param {import("knex").Knex} knex
- * @returns {Promise<void>}
+ * Standalone seed — Drizzle insert namunasi (jadval: ${file})
+ * @param {import("drizzle-orm/node-postgres").NodePgDatabase} db
  */
-exports.seed = async function (knex) {
-    try {
-        const data = ${JSON.stringify(data, null, 4)};
-        await knex("${table}").insert(data);
-    } catch (error) {
-        console.error(error);
-    }
+exports.seed = async function () {
+    console.warn("Seed faylni loyihadagi schema bilan qo'lda moslang.");
 };`,
                     "utf8"
                 );
-                console.log(table, "tayyor");
+                await fs.promises.writeFile(`${logsDir}/${i + 1}_${file}.json`, JSON.stringify(data, null, 4), "utf8");
+                console.log(file, "tayyor");
             } catch (error) {
-                console.error(error);
+                console.error(file, error);
             }
         }
     } catch (error) {
         console.error(error);
     } finally {
-        await knex.destroy();
+        await pool.end();
     }
 }
 

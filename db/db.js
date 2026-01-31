@@ -1,4 +1,2 @@
-const knex = require("knex");
-const knexfile = require("./knexfile");
-const db = knex(knexfile);
+const { db } = require("./client");
 module.exports = db;

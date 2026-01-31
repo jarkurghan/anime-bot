@@ -1,38 +1,38 @@
 const { Markup } = require("telegraf");
-const knex = require("../db/db");
+const { db } = require("../db/client");
+const { anime, episode } = require("../db/schema");
+const { eq, or, ilike, asc, sql } = require("drizzle-orm");
 
 const renderAnimePage = async (page = 0, search = "") => {
     const pageSize = 10;
-    const animeList = await knex("anime").where((qb) => {
-        if (search) {
-            qb.where("anime.name", "ILIKE", `%${search}%`);
-            qb.orWhere("anime.keys", "ILIKE", `%${search}%`);
-        }
-    });
+    let animeList;
+    if (search) {
+        animeList = await db
+            .select()
+            .from(anime)
+            .where(or(ilike(anime.name, `%${search}%`), ilike(anime.keys, `%${search}%`)));
+    } else {
+        animeList = await db.select().from(anime);
+    }
 
     const totalPages = Math.ceil(animeList.length / pageSize);
 
-    const getPage = (page) => {
-        const start = page * pageSize;
+    const getPage = (p) => {
+        const start = p * pageSize;
         const end = start + pageSize;
         return animeList.slice(start, end);
     };
 
     const currentPage = getPage(page);
-    // const listMaker = (anime, index) =>
-    //     `<i>${index + 1 + page * pageSize}. ${anime.name} - ${anime.number_of_episode == anime.episode_count ? "to'liq" : "tugatilmagan"} - ${
-    //         anime.episode_count
-    //     } qism</i>`;
-    const listMaker = (anime, index) => `<i>${index + 1 + page * pageSize}. ${anime.name}</i>`;
+    const listMaker = (a, index) => `<i>${index + 1 + page * pageSize}. ${a.name}</i>`;
     const textList =
         `<b>Animelar ro'yxati: ${page * pageSize + 1}-${page * pageSize + currentPage.length}</b>\n\n` +
         currentPage.map(listMaker).join("\n") +
         "\n\n<blockquote>Bot yangiliklaridan xabardor bo'lish uchun @ani_uz_news kanaliga a'zo bo'ling!</blockquote>";
-    // "\n\nBu yerda sizning reklamangiz bo'lishi mumkin edi!";
 
     const buttons = [];
-    currentPage.forEach((anime, index) => {
-        const button = Markup.button.callback(`${index + 1 + page * pageSize}`, `anime_${anime.id}`);
+    currentPage.forEach((a, index) => {
+        const button = Markup.button.callback(`${index + 1 + page * pageSize}`, `anime_${a.id}`);
         const rowIndex = Math.floor(index / 5);
         if (!buttons[rowIndex]) buttons[rowIndex] = [];
         buttons[rowIndex].push(button);
@@ -50,34 +50,37 @@ const renderAnimePage = async (page = 0, search = "") => {
 
 const renderEpisodePage = async (animeId, page) => {
     const pageSize = 10;
-    // const episodeList = await knex("episode").select("id", "episode", "name").where("anime_id", animeId).groupBy("episode").orderBy("id");
-    const anime = await knex("anime").select("id", "name").where("id", animeId).first();
-    const episodeList = await knex("episode")
-        .select("id", "name", "episode")
-        .where("anime_id", animeId)
-        .whereIn("id", function () {
-            this.select(knex.raw("MIN(id)")).from("episode").where("anime_id", animeId).groupBy("episode");
+    const [animeRow] = await db.select({ id: anime.id, name: anime.name }).from(anime).where(eq(anime.id, animeId)).limit(1);
+
+    const episodeList = await db
+        .select({
+            id: episode.id,
+            name: episode.name,
+            episode: episode.episode,
         })
-        .orderBy("id", "asc");
+        .from(episode)
+        .where(
+            sql`anime_id = ${animeId} AND id IN (SELECT MIN(id) FROM episode WHERE anime_id = ${animeId} GROUP BY episode)`
+        )
+        .orderBy(asc(episode.id));
 
     const totalPages = Math.ceil(episodeList.length / pageSize);
 
-    const getPage = (page) => {
-        const start = page * pageSize;
+    const getPage = (p) => {
+        const start = p * pageSize;
         const end = start + pageSize;
         return episodeList.slice(start, end);
     };
 
     const currentPage = getPage(page);
     const textList =
-        `<b>${anime.name}: ${page * pageSize + 1}-${page * pageSize + currentPage.length}</b> \nUmumiy ${episodeList.length} qism\n\n` +
-        currentPage.map((episode, i) => `<i>${page * pageSize + 1 + i}. <b>${episode.episode}</b>. ${episode.name}</i>`).join("\n") +
+        `<b>${animeRow.name}: ${page * pageSize + 1}-${page * pageSize + currentPage.length}</b> \nUmumiy ${episodeList.length} qism\n\n` +
+        currentPage.map((ep, i) => `<i>${page * pageSize + 1 + i}. <b>${ep.episode}</b>. ${ep.name}</i>`).join("\n") +
         "\n\n<blockquote>Bot yangiliklaridan xabardor bo'lish uchun @ani_uz_news kanaliga a'zo bo'ling!</blockquote>";
-    // "\n\nBu yerda sizning reklamangiz bo'lishi mumkin edi!";
 
     const buttons = [];
-    currentPage.forEach((episode, index) => {
-        const button = Markup.button.callback(`${index + 1 + page * pageSize}`, `episode_${episode.id}`);
+    currentPage.forEach((ep, index) => {
+        const button = Markup.button.callback(`${index + 1 + page * pageSize}`, `episode_${ep.id}`);
         const rowIndex = Math.floor(index / 5);
         if (!buttons[rowIndex]) buttons[rowIndex] = [];
         buttons[rowIndex].push(button);
