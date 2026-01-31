@@ -1,5 +1,7 @@
 const { Telegraf, Markup } = require("telegraf");
-const db = require("../db/db");
+const { db } = require("../db/client");
+const { user, userPage } = require("../db/schema");
+const { eq } = require("drizzle-orm");
 const { checkSubscription } = require("./check-subscription");
 const { renderAnimePage } = require("./render-page");
 const { sendManga } = require("./manga");
@@ -12,14 +14,19 @@ const requiredChannels = [{ username: process.env.MY_CHANNEL_USERNAME, name: pro
 
 async function createUserDB(ctx) {
     const { id: user_id, username, first_name, last_name } = ctx.from;
-    const user = { user_id, username, first_name, last_name };
+    const newUser = {
+        userId: user_id,
+        username,
+        firstName: first_name,
+        lastName: last_name,
+    };
 
-    const existingUser = await db("user").where({ user_id }).first();
+    const [existingUser] = await db.select().from(user).where(eq(user.userId, user_id)).limit(1);
     try {
         if (!existingUser) {
             await ctx.reply("Botga xush kelibsiz! 🎉\n\n", Markup.removeKeyboard());
-            const dbUser = await db("user").insert(user).returning("*");
-            await db("user_page").insert({ user_id: dbUser[0].id });
+            const [dbUser] = await db.insert(user).values(newUser).returning();
+            await db.insert(userPage).values({ userId: dbUser.id });
             const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID;
             await bot.telegram.sendMessage(
                 ADMIN_CHAT_ID,
@@ -37,11 +44,9 @@ async function createUserDB(ctx) {
 }
 
 async function start(ctx) {
-    //------------------------------- insert db ---------------------------------
     await createUserDB(ctx);
-    const existingUser = await db("user").where({ user_id: ctx.from.id }).first();
+    const [existingUser] = await db.select().from(user).where(eq(user.userId, ctx.from.id)).limit(1);
 
-    //------------------------------- check subscription ---------------------------------
     const notSubscribed = await checkSubscription(ctx);
 
     if (notSubscribed.length > 0) {
@@ -51,19 +56,19 @@ async function start(ctx) {
         );
     }
 
-    //------------------------------- response ---------------------------------
     if (ctx.startPayload && ctx.startPayload.slice(0, 5) === "manga") {
         const manga = await sendManga(ctx);
         if (manga) return;
     }
 
     if (ctx.startPayload && ctx.startPayload.slice(0, 11) === "watch_anime") {
-        const anime = await sendAnime(ctx);
-        if (anime) return;
+        const animeResult = await sendAnime(ctx);
+        if (animeResult) return;
     }
 
-    const userPage = existingUser ? await db("user_page").where({ user_id: existingUser.id }).first() : { anime_page: 0, searching: "" };
-    const { textList, buttons } = await renderAnimePage(userPage.anime_page, userPage.searching);
+    const [up] = existingUser ? await db.select().from(userPage).where(eq(userPage.userId, existingUser.id)).limit(1) : [null];
+    const userPageDefaults = up || { animePage: 0, searching: "" };
+    const { textList, buttons } = await renderAnimePage(userPageDefaults.animePage, userPageDefaults.searching);
     await ctx.reply(textList, { parse_mode: "HTML", ...Markup.inlineKeyboard(buttons) });
 }
 

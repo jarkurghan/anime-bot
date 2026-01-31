@@ -1,18 +1,23 @@
-const knex = require("../db/db");
+const { db } = require("../db/client");
+const { episode, channelPost } = require("../db/schema");
+const { eq, and, inArray } = require("drizzle-orm");
 const { logError } = require("../logger");
 
 const sendAnime = async (ctx) => {
     try {
         const episodeID = ctx.startPayload.slice(12);
-        const episode = await knex("episode").where({ id: episodeID }).first();
-        const all = await knex("episode").where({ episode: episode.episode }).where({ anime_id: episode.anime_id });
-        const allID = all.map((episode) => episode.id);
-        const posts = await knex("channel_post").whereIn("episode_id", allID);
+        const [ep] = await db.select().from(episode).where(eq(episode.id, Number(episodeID))).limit(1);
+        const all = await db
+            .select()
+            .from(episode)
+            .where(and(eq(episode.episode, ep.episode), eq(episode.animeId, ep.animeId)));
+        const allID = all.map((e) => e.id);
+        const posts = await db.select().from(channelPost).where(inArray(channelPost.episodeId, allID));
         const channel = process.env.CHANNEL_ID;
 
         let isExist = false;
         for (let i = 0; i < posts.length; i++) {
-            await ctx.telegram.copyMessage(ctx.chat.id, channel, posts[i].post_id).then(() => (isExist = true));
+            await ctx.telegram.copyMessage(ctx.chat.id, channel, posts[i].postId).then(() => (isExist = true));
         }
 
         if (isExist) return true;
