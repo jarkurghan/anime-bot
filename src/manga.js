@@ -1,4 +1,4 @@
-const { logError } = require("../logger");
+import { logError } from "../logger/index.js";
 
 const sendManga = async (ctx) => {
     try {
@@ -62,4 +62,4 @@ const sendManga = async (ctx) => {
     }
 };
 
-module.exports = { sendManga };
+export { sendManga };

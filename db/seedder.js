@@ -1,6 +1,9 @@
-const { pool } = require("./client");
-const path = require("path");
-const fs = require("fs");
+import path from "node:path";
+import fs from "node:fs";
+import { fileURLToPath } from "node:url";
+import { pool } from "./client.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /** PostgreSQL jadval nomlari (user — rezerv so'z). */
 const TABLES = [
@@ -27,9 +30,8 @@ async function exportData() {
                     `${logsDir}/${i + 1}_${file}.js`,
                     `/**
  * Standalone seed — Drizzle insert namunasi (jadval: ${file})
- * @param {import("drizzle-orm/node-postgres").NodePgDatabase} db
  */
-exports.seed = async function () {
+export async function seed() {
     console.warn("Seed faylni loyihadagi schema bilan qo'lda moslang.");
 };`,
                     "utf8"

@@ -1,10 +1,9 @@
-const { Markup } = require("telegraf");
-const { renderEpisodePage } = require("./render-page");
-const { renderAnimePage } = require("./render-page");
-const { logError } = require("../logger");
-const { db } = require("../db/client");
-const { user, userPage, anime, episode, channelPost } = require("../db/schema");
-const { eq, and, gte, lte } = require("drizzle-orm");
+import { Markup } from "telegraf";
+import { renderEpisodePage, renderAnimePage } from "./render-page.js";
+import { logError } from "../logger/index.js";
+import { db } from "../db/client.js";
+import { user, userPage, anime, episode, channelPost } from "../db/schema.js";
+import { eq, and, gte, lte } from "drizzle-orm";
 
 const search = async (ctx) => {
     try {
@@ -278,4 +277,4 @@ async function watch(ctx) {
     }
 }
 
-module.exports = { changePage, selectAnime, selectEpisode, selectAllEpisode, episodePage, backToAnime, animeList, episodeList, watch, search, reserFilter };
+export { changePage, selectAnime, selectEpisode, selectAllEpisode, episodePage, backToAnime, animeList, episodeList, watch, search, reserFilter };

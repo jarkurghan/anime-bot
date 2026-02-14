@@ -1,7 +1,7 @@
-const { db } = require("../db/client");
-const { episode, channelPost } = require("../db/schema");
-const { eq, and, inArray } = require("drizzle-orm");
-const { logError } = require("../logger");
+import { db } from "../db/client.js";
+import { episode, channelPost } from "../db/schema.js";
+import { eq, and, inArray } from "drizzle-orm";
+import { logError } from "../logger/index.js";
 
 const sendAnime = async (ctx) => {
     try {
@@ -32,4 +32,4 @@ const sendAnime = async (ctx) => {
     }
 };
 
-module.exports = { sendAnime };
+export { sendAnime };

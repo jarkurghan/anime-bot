@@ -1,2 +1,1 @@
-const { userDb } = require("./user-client");
-module.exports = userDb;
+export { userDb as default } from "./user-client.js";

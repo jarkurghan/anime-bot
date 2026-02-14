@@ -1,4 +1,4 @@
-const { logError } = require("../logger");
+import { logError } from "../logger/index.js";
 const requiredChannels = [{ username: process.env.MY_CHANNEL_USERNAME, name: process.env.MY_CHANNEL_NAME }];
 
 async function checkSubscription(ctx) {
@@ -21,4 +21,4 @@ async function checkSubscription(ctx) {
     return notSubscribed;
 }
 
-module.exports = { checkSubscription };
+export { checkSubscription };

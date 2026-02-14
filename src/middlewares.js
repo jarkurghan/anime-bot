@@ -1,7 +1,7 @@
-const { userDb } = require("../db/user-client");
-const { animeBot } = require("../db/schema");
-const { eq, and } = require("drizzle-orm");
-const { logError } = require("../logger");
+import { userDb } from "../db/user-client.js";
+import { animeBot } from "../db/schema.js";
+import { eq, and } from "drizzle-orm";
+import { logError } from "../logger/index.js";
 
 async function createUserDB(data) {
     try {
@@ -39,4 +39,4 @@ async function userActivity(ctx, next) {
     return next();
 }
 
-module.exports = { userActivity };
+export { userActivity };

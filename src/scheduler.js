@@ -1,11 +1,14 @@
-const schedule = require("node-schedule");
-const fs = require("fs");
-const path = require("path");
-const { db } = require("../db/client");
-const { userDb } = require("../db/user-client");
-const { user, anime, episode, dub, animeBot } = require("../db/schema");
-const { eq, lt, desc, sum } = require("drizzle-orm");
-const { logError } = require("../logger");
+import schedule from "node-schedule";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { db } from "../db/client.js";
+import { userDb } from "../db/user-client.js";
+import { user, anime, episode, dub, animeBot } from "../db/schema.js";
+import { eq, lt, desc, sum } from "drizzle-orm";
+import { logError } from "../logger/index.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID;
 const FOLDER_NAME = process.env.NODE_ENV === "production" ? "db" : "drafts";
@@ -155,4 +158,4 @@ const sendUserActivity = (bot) => {
     });
 };
 
-module.exports = { sendDataToAdmin, sendUserActivity };
+export { sendDataToAdmin, sendUserActivity };

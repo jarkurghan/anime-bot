@@ -1,27 +1,24 @@
-const env = process.env.NODE_ENV === "production" ? ".env.production" : ".env";
-require("dotenv").config({ path: env });
+import "./load-env.js";
+import { Telegraf } from "telegraf";
+import { start } from "./src/start.js";
+import {
+    watch,
+    search,
+    reserFilter,
+    episodePage,
+    selectEpisode,
+    backToAnime,
+    changePage,
+    selectAnime,
+    animeList,
+    episodeList,
+    selectAllEpisode,
+} from "./src/methods.js";
+import { handleMessage } from "./src/auth.js";
+import { sendDataToAdmin, sendUserActivity } from "./src/scheduler.js";
+import { userActivity } from "./src/middlewares.js";
 
-const { Telegraf } = require("telegraf");
 const bot = new Telegraf(process.env.BOT_TOKEN);
-
-const { start } = require("./src/start");
-const { watch } = require("./src/methods.js");
-const { search } = require("./src/methods.js");
-const { reserFilter } = require("./src/methods.js");
-const { handleMessage } = require("./src/auth.js");
-const { episodePage } = require("./src/methods.js");
-const { selectEpisode } = require("./src/methods.js");
-const { backToAnime } = require("./src/methods.js");
-const { changePage } = require("./src/methods.js");
-const { selectAnime } = require("./src/methods.js");
-const { animeList } = require("./src/methods.js");
-const { episodeList } = require("./src/methods.js");
-const { sendDataToAdmin } = require("./src/scheduler.js");
-const { selectAllEpisode } = require("./src/methods.js");
-const { sendUserActivity } = require("./src/scheduler.js");
-const { userActivity } = require("./src/middlewares.js");
-
-//  to-do: no forward message
 
 bot.start(start);
 bot.use(userActivity);

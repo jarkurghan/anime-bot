@@ -1,7 +1,7 @@
-const { Markup } = require("telegraf");
-const { db } = require("../db/client");
-const { anime, episode } = require("../db/schema");
-const { eq, or, ilike, asc, sql } = require("drizzle-orm");
+import { Markup } from "telegraf";
+import { db } from "../db/client.js";
+import { anime, episode } from "../db/schema.js";
+import { eq, or, ilike, asc, sql } from "drizzle-orm";
 
 const renderAnimePage = async (page = 0, search = "") => {
     const pageSize = 10;
@@ -106,4 +106,4 @@ const renderEpisodePage = async (animeId, page) => {
     return { textList, buttons };
 };
 
-module.exports = { renderAnimePage, renderEpisodePage };
+export { renderAnimePage, renderEpisodePage };

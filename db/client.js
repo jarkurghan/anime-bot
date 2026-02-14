@@ -1,9 +1,12 @@
-require("dotenv").config({ path: process.env.NODE_ENV === "production" ? ".env.production" : ".env" });
-require("dotenv").config({ path: process.env.NODE_ENV === "production" ? "../.env.production" : "../.env" });
+import dotenv from "dotenv";
+import { drizzle } from "drizzle-orm/node-postgres";
+import pg from "pg";
+import * as schema from "./schema.js";
 
-const { drizzle } = require("drizzle-orm/node-postgres");
-const { Pool } = require("pg");
-const schema = require("./schema");
+dotenv.config({ path: process.env.NODE_ENV === "production" ? ".env.production" : ".env" });
+dotenv.config({ path: process.env.NODE_ENV === "production" ? "../.env.production" : "../.env" });
+
+const { Pool } = pg;
 
 const pool = new Pool({
     connectionString: process.env.DATABASE,
@@ -12,4 +15,4 @@ const pool = new Pool({
 
 const db = drizzle(pool, { schema });
 
-module.exports = { db, pool, schema };
+export { db, pool, schema };

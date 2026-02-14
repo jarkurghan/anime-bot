@@ -1,7 +1,10 @@
-const path = require("path");
-const fs = require("fs");
+import path from "node:path";
+import fs from "node:fs";
+import { fileURLToPath } from "node:url";
 
-function logError(command, error) {
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export function logError(command, error) {
     try {
         const logsDir = path.join(__dirname, "logs");
         if (!fs.existsSync(logsDir)) fs.mkdirSync(logsDir);
@@ -10,9 +13,7 @@ function logError(command, error) {
         const logMessage = `${new Date().toISOString()}\n\n${error.stack}`;
 
         fs.appendFileSync(logFilePath, logMessage, "utf8");
-    } catch (error) {
-        console.log(error);
+    } catch (err) {
+        console.log(err);
     }
 }
-
-exports.logError = logError;

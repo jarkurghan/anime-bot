@@ -1,12 +1,12 @@
-const { Telegraf, Markup } = require("telegraf");
-const { db } = require("../db/client");
-const { user, userPage } = require("../db/schema");
-const { eq } = require("drizzle-orm");
-const { checkSubscription } = require("./check-subscription");
-const { renderAnimePage } = require("./render-page");
-const { sendManga } = require("./manga");
-const { logError } = require("../logger");
-const { sendAnime } = require("./request-from-channel");
+import { Telegraf, Markup } from "telegraf";
+import { db } from "../db/client.js";
+import { user, userPage } from "../db/schema.js";
+import { eq } from "drizzle-orm";
+import { checkSubscription } from "./check-subscription.js";
+import { renderAnimePage } from "./render-page.js";
+import { sendManga } from "./manga.js";
+import { logError } from "../logger/index.js";
+import { sendAnime } from "./request-from-channel.js";
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -72,4 +72,4 @@ async function start(ctx) {
     await ctx.reply(textList, { parse_mode: "HTML", ...Markup.inlineKeyboard(buttons) });
 }
 
-module.exports = { start };
+export { start };

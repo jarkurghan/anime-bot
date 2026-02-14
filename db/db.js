@@ -1,2 +1,1 @@
-const { db } = require("./client");
-module.exports = db;
+export { db } from "./client.js";

@@ -1,7 +1,7 @@
-const { actions } = require("..");
-const { logError } = require("../logger");
-const { checkSubscription } = require("./check-subscription");
-const { Markup } = require("telegraf");
+import { actions } from "./actions.js";
+import { logError } from "../logger/index.js";
+import { checkSubscription } from "./check-subscription.js";
+import { Markup } from "telegraf";
 
 const requiredChannels = [{ username: process.env.MY_CHANNEL_USERNAME, name: process.env.MY_CHANNEL_NAME }];
 const ADMIN_ID = process.env.ADMIN_ID;
@@ -57,4 +57,4 @@ async function handleMessage(ctx, next) {
     next();
 }
 
-module.exports = { handleMessage };
+export { handleMessage };
