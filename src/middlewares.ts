@@ -1,9 +1,10 @@
+import type { Context, MiddlewareFn } from "telegraf";
 import { userDb } from "../db/user-client.js";
 import { animeBot } from "../db/schema.js";
 import { eq, and } from "drizzle-orm";
 import { logError } from "../logger/index.js";
 
-async function createUserDB(data) {
+async function createUserDB(data: { date: string; tg_name: string; tg_user_id: number; tg_username?: string }): Promise<void> {
     try {
         const { date, tg_name, tg_user_id, tg_username } = data;
 
@@ -20,23 +21,23 @@ async function createUserDB(data) {
                 .set({ clicked: (existingUser.clicked ?? 0) + 1 })
                 .where(and(eq(animeBot.date, date), eq(animeBot.tgUserId, tg_user_id)));
         }
-    } catch (error) {
-        console.error(error.message);
+    } catch (error: unknown) {
+        console.error(error instanceof Error ? error.message : error);
         logError("middleware_user_activity", error);
     }
 }
 
-async function userActivity(ctx, next) {
+export const userActivity: MiddlewareFn<Context> = async (ctx, next) => {
     try {
         const isoDate = new Date().toISOString().slice(0, 10);
-        const { id: tg_user_id, username: tg_username, first_name, last_name } = ctx.from;
-        const tg_name = `${first_name || "Noma'lum"} ${last_name || ""}`;
+        const from = ctx.from;
+        if (!from) return next();
+        const { id: tg_user_id, username: tg_username, first_name, last_name } = from;
+        const tg_name = `${first_name ?? "Noma'lum"} ${last_name ?? ""}`;
 
-        createUserDB({ date: isoDate, tg_name, tg_user_id, tg_username });
+        void createUserDB({ date: isoDate, tg_name, tg_user_id, tg_username });
     } catch (error) {
         console.log(error);
     }
     return next();
-}
-
-export { userActivity };
+};

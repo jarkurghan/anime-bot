@@ -14,9 +14,9 @@ const TABLES = [
     { file: "episode", sql: "episode" },
     { file: "channel_post", sql: "channel_post" },
     { file: "user_page", sql: "user_page" },
-];
+] as const;
 
-async function exportData() {
+async function exportData(): Promise<void> {
     try {
         const logsDir = path.join(__dirname, `seeds`);
         if (!fs.existsSync(logsDir)) fs.mkdirSync(logsDir);
@@ -25,7 +25,9 @@ async function exportData() {
             const { file, sql: tableSql } = TABLES[i];
             try {
                 const { rows: data } = await pool.query(`SELECT * FROM ${tableSql}`);
-                data.forEach((item) => delete item.id);
+                for (const item of data as Record<string, unknown>[]) {
+                    delete item.id;
+                }
                 await fs.promises.writeFile(
                     `${logsDir}/${i + 1}_${file}.js`,
                     `/**
@@ -49,4 +51,4 @@ export async function seed() {
     }
 }
 
-exportData();
+void exportData();

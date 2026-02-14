@@ -4,13 +4,14 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export function logError(command, error) {
+export function logError(command: string, error: unknown): void {
     try {
         const logsDir = path.join(__dirname, "logs");
         if (!fs.existsSync(logsDir)) fs.mkdirSync(logsDir);
 
         const logFilePath = path.join(logsDir, `${new Date().getTime()}_${command}.log`);
-        const logMessage = `${new Date().toISOString()}\n\n${error.stack}`;
+        const stack = error instanceof Error ? error.stack : String(error);
+        const logMessage = `${new Date().toISOString()}\n\n${stack}`;
 
         fs.appendFileSync(logFilePath, logMessage, "utf8");
     } catch (err) {

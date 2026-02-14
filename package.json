@@ -2,14 +2,16 @@
     "name": "anime-bot",
     "version": "1.4.0",
     "description": "",
-    "main": "index.js",
+    "main": "dist/index.js",
     "type": "module",
     "scripts": {
-        "start": "node index.js",
-        "dev": "nodemon index.js",
-        "db:generate": "drizzle-kit generate --config drizzle.config.cjs",
-        "db:push": "drizzle-kit push --config drizzle.config.cjs",
-        "db:studio": "drizzle-kit studio --config drizzle.config.cjs"
+        "build": "tsc",
+        "start": "node dist/index.js",
+        "dev": "tsx watch index.ts",
+        "typecheck": "tsc --noEmit",
+        "db:generate": "drizzle-kit generate --config drizzle.config.ts",
+        "db:push": "drizzle-kit push --config drizzle.config.ts",
+        "db:studio": "drizzle-kit studio --config drizzle.config.ts"
     },
     "repository": {
         "type": "git",
@@ -35,12 +37,18 @@
         "telegraf": "^4.16.3"
     },
     "devDependencies": {
-        "drizzle-kit": "^0.31.10"
+        "@types/node": "^22.13.10",
+        "@types/node-schedule": "^2.1.7",
+        "@types/pg": "^8.11.11",
+        "drizzle-kit": "^0.31.10",
+        "tsx": "^4.19.3",
+        "typescript": "^5.8.2"
     },
     "nodemonConfig": {
         "ignore": [
             "drafts/*",
-            "node_modules"
+            "node_modules",
+            "dist"
         ]
     }
 }

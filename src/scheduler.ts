@@ -1,3 +1,4 @@
+import type { Telegraf } from "telegraf";
 import schedule from "node-schedule";
 import fs from "node:fs";
 import path from "node:path";
@@ -13,7 +14,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID;
 const FOLDER_NAME = process.env.NODE_ENV === "production" ? "db" : "drafts";
 
-function countFilesInDirectory(directoryPath) {
+function countFilesInDirectory(directoryPath: string): Promise<number> {
     return new Promise((resolve, reject) => {
         fs.readdir(directoryPath, (err, files) => {
             if (err) reject(err);
@@ -25,7 +26,8 @@ function countFilesInDirectory(directoryPath) {
     });
 }
 
-const sendDataToAdmin = (bot) => {
+const sendDataToAdmin = (bot: Telegraf): void => {
+    if (!ADMIN_CHAT_ID) return;
     schedule.scheduleJob("10 0 * * *", async () => {
         try {
             const userRows = await db.select().from(user);
@@ -52,14 +54,15 @@ const sendDataToAdmin = (bot) => {
             await bot.telegram.sendMessage(ADMIN_CHAT_ID, message, { parse_mode: "HTML" });
 
             console.log("✅ scheduler");
-        } catch (error) {
-            console.error(error.message);
+        } catch (error: unknown) {
+            console.error(error instanceof Error ? error.message : error);
             logError("scheduler", error);
         }
     });
 };
 
-const sendUserActivity = (bot) => {
+const sendUserActivity = (bot: Telegraf): void => {
+    if (!ADMIN_CHAT_ID) return;
     schedule.scheduleJob("11 0 * * *", async () => {
         try {
             const date = new Date();
@@ -87,8 +90,8 @@ const sendUserActivity = (bot) => {
             }
 
             console.log("✅ user activity scheduler");
-        } catch (error) {
-            console.error(error.message);
+        } catch (error: unknown) {
+            console.error(error instanceof Error ? error.message : error);
             logError("scheduler", error);
         }
     });
@@ -115,7 +118,7 @@ const sendUserActivity = (bot) => {
             const total_clicked = users.reduce((s, u) => s + u.total_clicked, 0);
             users.sort((a, b) => b.total_clicked - a.total_clicked);
 
-            const infoByUser = new Map();
+            const infoByUser = new Map<number, (typeof table)[0]>();
             for (const row of table) {
                 if (!infoByUser.has(row.tgUserId)) infoByUser.set(row.tgUserId, row);
             }
@@ -139,9 +142,7 @@ const sendUserActivity = (bot) => {
                         .slice(0, 10)
                         .map((u) => {
                             const info = infoByUser.get(u.tg_user_id);
-                            const label = info?.tgUsername
-                                ? `@${info.tgUsername}`
-                                : `${u.tg_user_id}: ${info?.tgName || ""}`;
+                            const label = info?.tgUsername ? `@${info.tgUsername}` : `${u.tg_user_id}: ${info?.tgName ?? ""}`;
                             return `✅ ${label} <b>⭐️${u.total_clicked}</b>`;
                         })
                         .join("\n");
@@ -151,8 +152,8 @@ const sendUserActivity = (bot) => {
 
             await userDb.delete(animeBot).where(lt(animeBot.date, cutoffStr));
             console.log("✅ user activity scheduler");
-        } catch (error) {
-            console.error(error.message);
+        } catch (error: unknown) {
+            console.error(error instanceof Error ? error.message : error);
             logError("scheduler", error);
         }
     });

@@ -18,7 +18,13 @@ import { handleMessage } from "./src/auth.js";
 import { sendDataToAdmin, sendUserActivity } from "./src/scheduler.js";
 import { userActivity } from "./src/middlewares.js";
 
-const bot = new Telegraf(process.env.BOT_TOKEN);
+const token = process.env.BOT_TOKEN;
+if (!token) {
+    console.error("BOT_TOKEN is not set");
+    process.exit(1);
+}
+
+const bot = new Telegraf(token);
 
 bot.start(start);
 bot.use(userActivity);
