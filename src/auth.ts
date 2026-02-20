@@ -1,7 +1,7 @@
 import type { Context, MiddlewareFn } from "telegraf";
 import { Markup } from "telegraf";
-import { actions } from "./actions.js";
-import { checkSubscription } from "./check-subscription.js";
+import { actions } from "./actions.ts";
+import { checkSubscription } from "./check-subscription.ts";
 
 const requiredChannels = [{ username: process.env.MY_CHANNEL_USERNAME, name: process.env.MY_CHANNEL_NAME }];
 const ADMIN_ID = process.env.ADMIN_ID;

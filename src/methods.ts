@@ -1,11 +1,11 @@
 import type { Context } from "telegraf";
 import { Markup } from "telegraf";
-import { renderEpisodePage, renderAnimePage } from "./render-page.js";
-import { logError } from "../logger/index.js";
-import { db } from "../db/client.js";
-import { user, userPage, anime, episode, channelPost } from "../db/schema.js";
+import { renderEpisodePage, renderAnimePage } from "./render-page.ts";
+import { logError } from "../logger/index.ts";
+import { db } from "../db/client.ts";
+import { user, userPage, anime, episode, channelPost } from "../db/schema.ts";
 import { eq, and, gte, lte } from "drizzle-orm";
-import type { MatchedContext } from "./types.js";
+import type { MatchedContext } from "./types.ts";
 
 const search = async (ctx: Context): Promise<void> => {
     try {

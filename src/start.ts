@@ -1,14 +1,14 @@
 import type { Context } from "telegraf";
-import type { ContextWithStartPayload } from "./types.js";
+import type { ContextWithStartPayload } from "./types.ts";
 import { Markup } from "telegraf";
-import { db } from "../db/client.js";
-import { user, userPage } from "../db/schema.js";
+import { db } from "../db/client.ts";
+import { user, userPage } from "../db/schema.ts";
 import { eq } from "drizzle-orm";
-import { checkSubscription } from "./check-subscription.js";
-import { renderAnimePage } from "./render-page.js";
-import { sendManga } from "./manga.js";
-import { logError } from "../logger/index.js";
-import { sendAnime } from "./request-from-channel.js";
+import { checkSubscription } from "./check-subscription.ts";
+import { renderAnimePage } from "./render-page.ts";
+import { sendManga } from "./manga.ts";
+import { logError } from "../logger/index.ts";
+import { sendAnime } from "./request-from-channel.ts";
 
 const requiredChannels = [{ username: process.env.MY_CHANNEL_USERNAME, name: process.env.MY_CHANNEL_NAME }];
 

@@ -1,7 +1,7 @@
 import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
-import { pool } from "./client.js";
+import { pool } from "./client.ts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

@@ -1,5 +1,5 @@
-import type { ContextWithStartPayload } from "./types.js";
-import { logError } from "../logger/index.js";
+import type { ContextWithStartPayload } from "./types.ts";
+import { logError } from "../logger/index.ts";
 
 const sendManga = async (ctx: ContextWithStartPayload): Promise<boolean | undefined> => {
     try {

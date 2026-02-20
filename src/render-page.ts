@@ -1,6 +1,6 @@
 import { Markup } from "telegraf";
-import { db } from "../db/client.js";
-import { anime, episode } from "../db/schema.js";
+import { db } from "../db/client.ts";
+import { anime, episode } from "../db/schema.ts";
 import { eq, or, ilike, asc, sql } from "drizzle-orm";
 
 const renderAnimePage = async (page = 0, search = "") => {
