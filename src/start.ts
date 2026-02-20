@@ -1,6 +1,6 @@
 import type { Context } from "telegraf";
 import type { ContextWithStartPayload } from "./types.js";
-import { Telegraf, Markup } from "telegraf";
+import { Markup } from "telegraf";
 import { db } from "../db/client.js";
 import { user, userPage } from "../db/schema.js";
 import { eq } from "drizzle-orm";
@@ -9,13 +9,6 @@ import { renderAnimePage } from "./render-page.js";
 import { sendManga } from "./manga.js";
 import { logError } from "../logger/index.js";
 import { sendAnime } from "./request-from-channel.js";
-
-const token = process.env.BOT_TOKEN;
-if (!token) {
-    throw new Error("BOT_TOKEN is required");
-}
-
-const bot = new Telegraf(token);
 
 const requiredChannels = [{ username: process.env.MY_CHANNEL_USERNAME, name: process.env.MY_CHANNEL_NAME }];
 
@@ -38,7 +31,7 @@ async function createUserDB(ctx: Context): Promise<void> {
             await db.insert(userPage).values({ userId: dbUser!.id });
             const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID;
             if (ADMIN_CHAT_ID) {
-                await bot.telegram.sendMessage(
+                await ctx.telegram.sendMessage(
                     ADMIN_CHAT_ID,
                     `🆕 Yangi foydalanuvchi:\n\n` +
                         `👤 Ism: ${first_name ?? "Noma'lum"} ${last_name ?? ""}\n` +

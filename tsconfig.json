@@ -8,10 +8,8 @@
         "skipLibCheck": true,
         "esModuleInterop": true,
         "resolveJsonModule": true,
-        "outDir": "dist",
-        "rootDir": ".",
-        "declaration": false,
-        "noEmitOnError": true
+        "noEmit": true,
+        "types": ["bun", "node"]
     },
     "include": ["index.ts", "load-env.ts", "drizzle.config.ts", "db/**/*.ts", "logger/**/*.ts", "src/**/*.ts"],
     "exclude": ["node_modules", "dist"]

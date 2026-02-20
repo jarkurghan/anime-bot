@@ -2,16 +2,18 @@
     "name": "anime-bot",
     "version": "1.4.0",
     "description": "",
-    "main": "dist/index.js",
+    "main": "index.ts",
     "type": "module",
     "scripts": {
-        "build": "tsc",
-        "start": "node dist/index.js",
-        "dev": "tsx watch index.ts",
+        "start": "bun run index.ts",
+        "dev": "bun --watch index.ts",
+        "build": "bun build index.ts --outdir dist --target bun --packages external",
+        "start:dist": "bun dist/index.js",
         "typecheck": "tsc --noEmit",
-        "db:generate": "drizzle-kit generate --config drizzle.config.ts",
-        "db:push": "drizzle-kit push --config drizzle.config.ts",
-        "db:studio": "drizzle-kit studio --config drizzle.config.ts"
+        "db:generate": "bunx drizzle-kit generate --config drizzle.config.ts",
+        "db:push": "bunx drizzle-kit push --config drizzle.config.ts",
+        "db:studio": "bunx drizzle-kit studio --config drizzle.config.ts",
+        "db:seed-export": "bun run db/seedder.ts"
     },
     "repository": {
         "type": "git",
@@ -21,8 +23,7 @@
     "author": "",
     "license": "ISC",
     "engines": {
-        "node": ">=24.11.0",
-        "npm": ">=11.6.0"
+        "bun": ">=1.1.0"
     },
     "bugs": {
         "url": "https://github.com/jarkurghan/anime-bot/issues"
@@ -32,23 +33,15 @@
         "dotenv": "^17.4.0",
         "drizzle-orm": "^0.45.2",
         "node-schedule": "^2.1.1",
-        "nodemon": "^3.1.14",
         "pg": "^8.20.0",
         "telegraf": "^4.16.3"
     },
     "devDependencies": {
+        "@types/bun": "^1.2.5",
         "@types/node": "^22.13.10",
         "@types/node-schedule": "^2.1.7",
         "@types/pg": "^8.11.11",
         "drizzle-kit": "^0.31.10",
-        "tsx": "^4.19.3",
         "typescript": "^5.8.2"
-    },
-    "nodemonConfig": {
-        "ignore": [
-            "drafts/*",
-            "node_modules",
-            "dist"
-        ]
     }
 }
