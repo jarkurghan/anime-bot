@@ -1,7 +1,10 @@
-import { Markup } from "telegraf";
-import { db } from "../db/client.ts";
-import { anime, episode } from "../db/schema.ts";
+import { db } from "../db/client.js";
+import { anime, episode } from "../db/schema.js";
 import { eq, or, ilike, asc, sql } from "drizzle-orm";
+import { cb } from "./keyboards.js";
+
+type CallbackButton = ReturnType<typeof cb>;
+type ButtonRow = CallbackButton[];
 
 const renderAnimePage = async (page = 0, search = "") => {
     const pageSize = 10;
@@ -30,18 +33,18 @@ const renderAnimePage = async (page = 0, search = "") => {
         currentPage.map(listMaker).join("\n") +
         "\n\n<blockquote>Bot yangiliklaridan xabardor bo'lish uchun @ani_uz_news kanaliga a'zo bo'ling!</blockquote>";
 
-    const buttons: ReturnType<typeof Markup.button.callback>[][] = [];
+    const buttons: ButtonRow[] = [];
     currentPage.forEach((a, index) => {
-        const button = Markup.button.callback(`${index + 1 + page * pageSize}`, `anime_${a.id}`);
+        const button = cb(`${index + 1 + page * pageSize}`, `anime_${a.id}`);
         const rowIndex = Math.floor(index / 5);
         if (!buttons[rowIndex]) buttons[rowIndex] = [];
         buttons[rowIndex]!.push(button);
     });
 
-    const navigationButtons: ReturnType<typeof Markup.button.callback>[] = [];
-    if (page > 0) navigationButtons.push(Markup.button.callback("⬅️ Oldingi", `anime_list_${page - 1}`));
-    if (search) navigationButtons.push(Markup.button.callback("❌", "remove_searching"));
-    if (page < totalPages - 1) navigationButtons.push(Markup.button.callback("Keyingi ➡️", `anime_list_${page + 1}`));
+    const navigationButtons: CallbackButton[] = [];
+    if (page > 0) navigationButtons.push(cb("⬅️ Oldingi", `anime_list_${page - 1}`));
+    if (search) navigationButtons.push(cb("❌", "remove_searching"));
+    if (page < totalPages - 1) navigationButtons.push(cb("Keyingi ➡️", `anime_list_${page + 1}`));
     if (navigationButtons.length > 0) buttons.push(navigationButtons);
 
     if (animeList.length === 0) return { textList: "<b>Anime topilmadi!</b>", buttons };
@@ -52,7 +55,7 @@ const renderEpisodePage = async (animeId: number, page: number) => {
     const pageSize = 10;
     const [animeRow] = await db.select({ id: anime.id, name: anime.name }).from(anime).where(eq(anime.id, animeId)).limit(1);
     if (!animeRow?.name) {
-        return { textList: "<b>Topilmadi!</b>", buttons: [] };
+        return { textList: "<b>Topilmadi!</b>", buttons: [] as ButtonRow[] };
     }
 
     const episodeList = await db
@@ -75,7 +78,7 @@ const renderEpisodePage = async (animeId: number, page: number) => {
 
     const currentPage = getPage(page);
     if (currentPage.length === 0) {
-        return { textList: "<b>Qismlar topilmadi!</b>", buttons: [] };
+        return { textList: "<b>Qismlar topilmadi!</b>", buttons: [] as ButtonRow[] };
     }
 
     const textList =
@@ -83,9 +86,9 @@ const renderEpisodePage = async (animeId: number, page: number) => {
         currentPage.map((ep, i) => `<i>${page * pageSize + 1 + i}. <b>${ep.episode}</b>. ${ep.name}</i>`).join("\n") +
         "\n\n<blockquote>Bot yangiliklaridan xabardor bo'lish uchun @ani_uz_news kanaliga a'zo bo'ling!</blockquote>";
 
-    const buttons: ReturnType<typeof Markup.button.callback>[][] = [];
+    const buttons: ButtonRow[] = [];
     currentPage.forEach((ep, index) => {
-        const button = Markup.button.callback(`${index + 1 + page * pageSize}`, `episode_${ep.id}`);
+        const button = cb(`${index + 1 + page * pageSize}`, `episode_${ep.id}`);
         const rowIndex = Math.floor(index / 5);
         if (!buttons[rowIndex]) buttons[rowIndex] = [];
         buttons[rowIndex]!.push(button);
@@ -93,20 +96,20 @@ const renderEpisodePage = async (animeId: number, page: number) => {
 
     const text = `${page * pageSize + 1}-${page * pageSize + currentPage.length}` + "   barchasini tanlash";
     const query = "all_episode_" + currentPage[0]!.id + "_" + currentPage[currentPage.length - 1]!.id;
-    buttons.push([Markup.button.callback(text, query)]);
+    buttons.push([cb(text, query)]);
 
-    const navigationButtons: ReturnType<typeof Markup.button.callback>[] = [];
+    const navigationButtons: CallbackButton[] = [];
     if (page > 0) {
-        navigationButtons.push(Markup.button.callback("⬅️ Oldingi", `elist_${animeId}_${page - 1}`));
+        navigationButtons.push(cb("⬅️ Oldingi", `elist_${animeId}_${page - 1}`));
     }
     if (page < totalPages - 1) {
-        navigationButtons.push(Markup.button.callback("Keyingi ➡️", `elist_${animeId}_${page + 1}`));
+        navigationButtons.push(cb("Keyingi ➡️", `elist_${animeId}_${page + 1}`));
     }
     if (navigationButtons.length > 0) {
         buttons.push(navigationButtons);
     }
 
-    buttons.push([Markup.button.callback("📂 Animelar ro'yxati", "back_anime_list")]);
+    buttons.push([cb("📂 Animelar ro'yxati", "back_anime_list")]);
 
     return { textList, buttons };
 };

@@ -1,6 +1,7 @@
-import "./load-env.ts";
-import { Telegraf } from "telegraf";
-import { start } from "./src/start.ts";
+import "./load-env.js";
+import type { Context, Middleware } from "grammy";
+import { Bot, Composer } from "grammy";
+import { start } from "./src/start.js";
 import {
     watch,
     search,
@@ -13,10 +14,10 @@ import {
     animeList,
     episodeList,
     selectAllEpisode,
-} from "./src/methods.ts";
-import { handleMessage } from "./src/auth.ts";
-import { sendDataToAdmin, sendUserActivity } from "./src/scheduler.ts";
-import { userActivity } from "./src/middlewares.ts";
+} from "./src/methods.js";
+import { handleMessage } from "./src/auth.js";
+import { sendDataToAdmin, sendUserActivity } from "./src/scheduler.js";
+import { userActivity } from "./src/middlewares.js";
 
 const token = process.env.BOT_TOKEN;
 if (!token) {
@@ -24,23 +25,34 @@ if (!token) {
     process.exit(1);
 }
 
-const bot = new Telegraf(token);
+const bot = new Bot(token);
 
-bot.start(start);
+bot.command("start", start);
+
 bot.use(userActivity);
-bot.action(/^anime_(\d+)$/, handleMessage, selectAnime);
-bot.action(/^anime_list_(\d+)$/, handleMessage, changePage);
-bot.action(/^back_anime_list$/, handleMessage, backToAnime);
-bot.action(/^episode_(\d+)$/, handleMessage, selectEpisode);
-bot.action(/^all_episode_(\d+)_(\d+)$/, handleMessage, selectAllEpisode);
-bot.action(/^elist_(\d+)_(\d+)$/, handleMessage, episodePage);
-bot.action(/^episode_list$/, handleMessage, episodeList);
-bot.action(/^anime_list$/, handleMessage, animeList);
-bot.action(/^watch_(.+)$/, handleMessage, watch);
-bot.action(/^remove_searching$/, reserFilter);
+
+function withAuth(second: Middleware<Context>): Composer<Context> {
+    const c = new Composer<Context>();
+    c.use(handleMessage);
+    c.use(second);
+    return c;
+}
+
+bot.callbackQuery(/^anime_(\d+)$/, withAuth(selectAnime as Middleware<Context>));
+bot.callbackQuery(/^anime_list_(\d+)$/, withAuth(changePage as Middleware<Context>));
+bot.callbackQuery(/^back_anime_list$/, withAuth(backToAnime as Middleware<Context>));
+bot.callbackQuery(/^episode_(\d+)$/, withAuth(selectEpisode as Middleware<Context>));
+bot.callbackQuery(/^all_episode_(\d+)_(\d+)$/, withAuth(selectAllEpisode as Middleware<Context>));
+bot.callbackQuery(/^elist_(\d+)_(\d+)$/, withAuth(episodePage as Middleware<Context>));
+bot.callbackQuery(/^episode_list$/, withAuth(episodeList as Middleware<Context>));
+bot.callbackQuery(/^anime_list$/, withAuth(animeList as Middleware<Context>));
+bot.callbackQuery(/^watch_(.+)$/, withAuth(watch as Middleware<Context>));
+bot.callbackQuery(/^remove_searching$/, reserFilter as Middleware<Context>);
+
 bot.on("message", search);
 
 sendDataToAdmin(bot);
 sendUserActivity(bot);
 
-bot.launch(() => console.log("Bot ishga tushdi."));
+bot.start();
+console.log("Bot ishga tushdi.");

@@ -1,13 +1,14 @@
-import type { Telegraf } from "telegraf";
+import type { Bot } from "grammy";
+import { InputFile } from "grammy";
 import schedule from "node-schedule";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { db } from "../db/client.ts";
-import { userDb } from "../db/user-client.ts";
-import { user, anime, episode, dub, animeBot } from "../db/schema.ts";
+import { db } from "../db/client.js";
+import { userDb } from "../db/user-client.js";
+import { user, anime, episode, dub, animeBot } from "../db/schema.js";
 import { eq, lt, desc, sum } from "drizzle-orm";
-import { logError } from "../logger/index.ts";
+import { logError } from "../logger/index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -26,7 +27,7 @@ function countFilesInDirectory(directoryPath: string): Promise<number> {
     });
 }
 
-const sendDataToAdmin = (bot: Telegraf): void => {
+const sendDataToAdmin = (bot: Bot): void => {
     if (!ADMIN_CHAT_ID) return;
     schedule.scheduleJob("10 0 * * *", async () => {
         try {
@@ -38,7 +39,7 @@ const sendDataToAdmin = (bot: Telegraf): void => {
 
             const JSONFilePath = path.join(__dirname, `../${FOLDER_NAME}/database-to-json.json`);
             await fs.promises.writeFile(JSONFilePath, JSON.stringify(data, null, 2));
-            await bot.telegram.sendDocument(ADMIN_CHAT_ID, { source: JSONFilePath }, { caption: "Ma'lumotlar bazasi json fayli." });
+            await bot.api.sendDocument(ADMIN_CHAT_ID, new InputFile(JSONFilePath), { caption: "Ma'lumotlar bazasi json fayli." });
             await fs.promises.unlink(JSONFilePath);
 
             const errorDir = path.join(__dirname, "../logger/logs");
@@ -51,7 +52,7 @@ const sendDataToAdmin = (bot: Telegraf): void => {
                 `🎙 Dublyaj studiyalari: <b>${dubRows.length} ta</b>\n` +
                 `🔢 Xatoliklar: <b>${errors} ta</b>\n` +
                 `🤖 Bot: <b>@${process.env.BOT_USERNAME}</b>\n`;
-            await bot.telegram.sendMessage(ADMIN_CHAT_ID, message, { parse_mode: "HTML" });
+            await bot.api.sendMessage(ADMIN_CHAT_ID, message, { parse_mode: "HTML" });
 
             console.log("✅ scheduler");
         } catch (error: unknown) {
@@ -61,7 +62,7 @@ const sendDataToAdmin = (bot: Telegraf): void => {
     });
 };
 
-const sendUserActivity = (bot: Telegraf): void => {
+const sendUserActivity = (bot: Bot): void => {
     if (!ADMIN_CHAT_ID) return;
     schedule.scheduleJob("11 0 * * *", async () => {
         try {
@@ -73,20 +74,20 @@ const sendUserActivity = (bot: Telegraf): void => {
 
             const JSONFilePath = path.join(__dirname, `../${FOLDER_NAME}/bir-kunlik-aktiv-foydalanuvchilar-hisoboti.json`);
             await fs.promises.writeFile(JSONFilePath, JSON.stringify(users, null, 2));
-            await bot.telegram.sendDocument(ADMIN_CHAT_ID, { source: JSONFilePath }, { caption: "Bir kunlik aktiv foydalanuvchilar hisoboti" });
+            await bot.api.sendDocument(ADMIN_CHAT_ID, new InputFile(JSONFilePath), { caption: "Bir kunlik aktiv foydalanuvchilar hisoboti" });
             await fs.promises.unlink(JSONFilePath);
 
             if (users.length === 0) {
                 const message = `📌 Aktiv foydalanuvchilar: <b>@${process.env.BOT_USERNAME}</b>\n\nBir kun ichida hech kim botdan foydalanmadi`;
-                await bot.telegram.sendMessage(ADMIN_CHAT_ID, message, { parse_mode: "HTML" });
+                await bot.api.sendMessage(ADMIN_CHAT_ID, message, { parse_mode: "HTML" });
             } else if (users.length > 30) {
                 const message = `📌 Aktiv foydalanuvchilar: <b>@${process.env.BOT_USERNAME}</b>\n\nBir kun ichida aktiv foydalanuvchilar soni 30dan ko'p. Batafsil bilib olish uchun hisobotga qarang`;
-                await bot.telegram.sendMessage(ADMIN_CHAT_ID, message, { parse_mode: "HTML" });
+                await bot.api.sendMessage(ADMIN_CHAT_ID, message, { parse_mode: "HTML" });
             } else {
                 const message =
                     `📌 Aktiv foydalanuvchilar: <b>@${process.env.BOT_USERNAME}</b>\n\n` +
                     users.map((u) => `✅ ${u.tgUsername ? `@${u.tgUsername}` : `${u.tgUserId}: ${u.tgName}`} <b>⭐️${u.clicked}</b>`).join("\n");
-                await bot.telegram.sendMessage(ADMIN_CHAT_ID, message, { parse_mode: "HTML" });
+                await bot.api.sendMessage(ADMIN_CHAT_ID, message, { parse_mode: "HTML" });
             }
 
             console.log("✅ user activity scheduler");
@@ -125,12 +126,12 @@ const sendUserActivity = (bot: Telegraf): void => {
 
             const JSONFilePath = path.join(__dirname, `../${FOLDER_NAME}/bir-oylik-aktiv-foydalanuvchilar-hisoboti.json`);
             await fs.promises.writeFile(JSONFilePath, JSON.stringify({ sorted: users, all: table }, null, 2));
-            await bot.telegram.sendDocument(ADMIN_CHAT_ID, { source: JSONFilePath }, { caption: "Bir kunlik aktiv foydalanuvchilar hisoboti" });
+            await bot.api.sendDocument(ADMIN_CHAT_ID, new InputFile(JSONFilePath), { caption: "Bir kunlik aktiv foydalanuvchilar hisoboti" });
             await fs.promises.unlink(JSONFilePath);
 
             if (users.length === 0) {
                 const message = `📌 Aktiv foydalanuvchilar: <b>@${process.env.BOT_USERNAME}</b>\n\nBir oy ichida hech kim botdan foydalanmadi`;
-                await bot.telegram.sendMessage(ADMIN_CHAT_ID, message, { parse_mode: "HTML" });
+                await bot.api.sendMessage(ADMIN_CHAT_ID, message, { parse_mode: "HTML" });
             } else {
                 const message =
                     `📌 Aktiv foydalanuvchilar: <b>@${process.env.BOT_USERNAME}</b>\n\n` +
@@ -147,7 +148,7 @@ const sendUserActivity = (bot: Telegraf): void => {
                         })
                         .join("\n");
 
-                await bot.telegram.sendMessage(ADMIN_CHAT_ID, message, { parse_mode: "HTML" });
+                await bot.api.sendMessage(ADMIN_CHAT_ID, message, { parse_mode: "HTML" });
             }
 
             await userDb.delete(animeBot).where(lt(animeBot.date, cutoffStr));

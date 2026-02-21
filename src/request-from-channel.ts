@@ -1,14 +1,13 @@
-import type { ContextWithStartPayload } from "./types.ts";
-import { db } from "../db/client.ts";
-import { episode, channelPost } from "../db/schema.ts";
+import type { Context } from "grammy";
+import { db } from "../db/client.js";
+import { episode, channelPost } from "../db/schema.js";
 import { eq, and, inArray } from "drizzle-orm";
-import { logError } from "../logger/index.ts";
+import { logError } from "../logger/index.js";
 
-const sendAnime = async (ctx: ContextWithStartPayload): Promise<boolean> => {
+const sendAnime = async (ctx: Context, startPayload: string): Promise<boolean> => {
     try {
-        const payload = ctx.startPayload;
-        if (!payload || payload.length < 13) return false;
-        const episodeID = payload.slice(12);
+        if (startPayload.length < 13) return false;
+        const episodeID = startPayload.slice(12);
         const [ep] = await db.select().from(episode).where(eq(episode.id, Number(episodeID))).limit(1);
         if (!ep) return false;
         const all = await db
@@ -20,9 +19,12 @@ const sendAnime = async (ctx: ContextWithStartPayload): Promise<boolean> => {
         const channel = process.env.CHANNEL_ID;
         if (!channel) return false;
 
+        const chatId = ctx.chat?.id;
+        if (chatId === undefined) return false;
+
         let isExist = false;
         for (let i = 0; i < posts.length; i++) {
-            await ctx.telegram.copyMessage(ctx.chat!.id, channel, posts[i].postId).then(() => {
+            await ctx.api.copyMessage(chatId, channel, posts[i]!.postId).then(() => {
                 isExist = true;
             });
         }

@@ -1,11 +1,11 @@
-import type { Context } from "telegraf";
-import { Markup } from "telegraf";
-import { renderEpisodePage, renderAnimePage } from "./render-page.ts";
-import { logError } from "../logger/index.ts";
-import { db } from "../db/client.ts";
-import { user, userPage, anime, episode, channelPost } from "../db/schema.ts";
+import type { Context } from "grammy";
+import { renderEpisodePage, renderAnimePage } from "./render-page.js";
+import { logError } from "../logger/index.js";
+import { db } from "../db/client.js";
+import { user, userPage, anime, episode, channelPost } from "../db/schema.js";
 import { eq, and, gte, lte } from "drizzle-orm";
-import type { MatchedContext } from "./types.ts";
+import type { MatchedContext } from "./types.js";
+import { cb, rowsToInlineKeyboard } from "./keyboards.js";
 
 const search = async (ctx: Context): Promise<void> => {
     try {
@@ -22,8 +22,7 @@ const search = async (ctx: Context): Promise<void> => {
             .set({ animePage: 0, episodePage: 0, searching: message })
             .where(eq(userPage.userId, u.id));
         const { textList, buttons } = await renderAnimePage(0, message);
-        const keyboard = Markup.inlineKeyboard(buttons);
-        await ctx.reply(textList, { parse_mode: "HTML", ...keyboard });
+        await ctx.reply(textList, { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
     } catch (error: unknown) {
         console.error(error instanceof Error ? error.message : error);
         logError("search", error);
@@ -40,7 +39,7 @@ const reserFilter = async (ctx: MatchedContext): Promise<void> => {
         }
         await db.update(userPage).set({ animePage: 0, episodePage: 0, searching: "" }).where(eq(userPage.userId, u.id));
         const { textList, buttons } = await renderAnimePage(0, "");
-        await ctx.editMessageText(textList, { parse_mode: "HTML", ...Markup.inlineKeyboard(buttons) });
+        await ctx.editMessageText(textList, { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
     } catch (error: unknown) {
         console.error(error instanceof Error ? error.message : error);
         logError("change_page", error);
@@ -59,8 +58,7 @@ const changePage = async (ctx: MatchedContext): Promise<void> => {
         const [updated] = await db.update(userPage).set({ animePage: page }).where(eq(userPage.userId, u.id)).returning();
 
         const { textList, buttons } = await renderAnimePage(page, updated?.searching ?? "");
-        const keyboard = Markup.inlineKeyboard(buttons);
-        await ctx.editMessageText(textList, { parse_mode: "HTML", ...keyboard });
+        await ctx.editMessageText(textList, { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
     } catch (error: unknown) {
         console.error(error instanceof Error ? error.message : error);
         logError("change_page", error);
@@ -91,20 +89,19 @@ const selectAnime = async (ctx: MatchedContext): Promise<void> => {
                 .where(and(eq(episode.animeId, post.animeId), eq(episode.episode, post.episode)));
             if (allDub.length === 1) {
                 const posts = await db.select().from(channelPost).where(eq(channelPost.episodeId, allDub[0]!.id));
-                for (let i = 0; i < posts.length; i++) await ctx.telegram.copyMessage(ctx.chat!.id, channel, posts[i]!.postId);
+                const chatId = ctx.chat!.id;
+                for (let i = 0; i < posts.length; i++) await ctx.api.copyMessage(chatId, channel, posts[i]!.postId);
 
-                const buttons = [[Markup.button.callback("📂 Animelar ro'yxati", "anime_list")]];
-                await ctx.reply("Quyidagi menulardan birini tanlang 👇", { parse_mode: "HTML", ...Markup.inlineKeyboard(buttons) });
+                const buttons = [[cb("📂 Animelar ro'yxati", "anime_list")]];
+                await ctx.reply("Quyidagi menulardan birini tanlang 👇", { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
             } else {
-                const buttons = allDub.map((d) => [Markup.button.callback(`🎙 ${d.dub}`, `watch_${d.id}`)]);
-                const buttonOptions = { parse_mode: "HTML" as const, ...Markup.inlineKeyboard(buttons) };
+                const buttons = allDub.map((d) => [cb(`🎙 ${d.dub}`, `watch_${d.id}`)]);
                 const text = `🎥 <b>${post.episode}. ${post.name}</b>\n\nUshbu qism bir nechta dublyaj studiyasi tomonidan dublyaj qilingan:`;
-                await ctx.reply(text, buttonOptions);
+                await ctx.reply(text, { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
             }
         } else {
             const { textList, buttons } = await renderEpisodePage(animeID, 0);
-            const keyboard = Markup.inlineKeyboard(buttons);
-            await ctx.reply(textList, { parse_mode: "HTML", ...keyboard });
+            await ctx.reply(textList, { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
         }
 
         void ctx.deleteMessage();
@@ -127,8 +124,7 @@ const episodePage = async (ctx: MatchedContext): Promise<void> => {
         await db.update(userPage).set({ episodePage: page }).where(eq(userPage.userId, u.id));
 
         const { textList, buttons } = await renderEpisodePage(animeId, page);
-        const keyboard = Markup.inlineKeyboard(buttons);
-        await ctx.editMessageText(textList, { parse_mode: "HTML", ...keyboard });
+        await ctx.editMessageText(textList, { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
     } catch (error: unknown) {
         console.error(error instanceof Error ? error.message : error);
         logError("episode_page", error);
@@ -160,21 +156,24 @@ const selectEpisode = async (ctx: MatchedContext): Promise<void> => {
             .where(and(eq(episode.animeId, ep.animeId), eq(episode.episode, ep.episode)));
         if (allDub.length === 1) {
             const posts = await db.select().from(channelPost).where(eq(channelPost.episodeId, allDub[0]!.id));
+            const chatId = ctx.chat!.id;
             for (let i = 0; i < posts.length; i++)
-                await ctx.telegram.copyMessage(ctx.chat!.id, channel!, posts[i]!.postId).catch((err: unknown) => {
+                await ctx.api.copyMessage(chatId, channel!, posts[i]!.postId).catch((err: unknown) => {
                     console.error(err instanceof Error ? err.message : err);
                     logError("select_episode_" + String(ep.id), err);
                     void ctx.reply("❌ Topilmadi!");
                 });
 
-            const buttons = [[Markup.button.callback("📄 Qismlar ro'yxati", "episode_list")], [Markup.button.callback("📂 Animelar ro'yxati", "anime_list")]];
-            await ctx.reply("Quyidagi menulardan birini tanlang 👇", { parse_mode: "HTML", ...Markup.inlineKeyboard(buttons) });
+            const buttons = [
+                [cb("📄 Qismlar ro'yxati", "episode_list")],
+                [cb("📂 Animelar ro'yxati", "anime_list")],
+            ];
+            await ctx.reply("Quyidagi menulardan birini tanlang 👇", { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
             await ctx.deleteMessage();
         } else {
-            const buttons = allDub.map((d) => [Markup.button.callback(`🎙 ${d.dub}`, `watch_${d.id}`)]);
-            const buttonOptions = { parse_mode: "HTML" as const, ...Markup.inlineKeyboard(buttons) };
+            const buttons = allDub.map((d) => [cb(`🎙 ${d.dub}`, `watch_${d.id}`)]);
             const text = `🎥 <b>${ep.episode}. ${ep.name}</b>\n\nUshbu qism bir nechta dublyaj studiyasi tomonidan dublyaj qilingan:`;
-            await ctx.reply(text, buttonOptions);
+            await ctx.reply(text, { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
             await ctx.deleteMessage();
         }
     } catch (error: unknown) {
@@ -206,6 +205,7 @@ const selectAllEpisode = async (ctx: MatchedContext): Promise<void> => {
             return;
         }
 
+        const chatId = ctx.chat!.id;
         for (let i = 0; i < episodes.length; i++) {
             const ep = episodes[i]!;
             const allDub = await db
@@ -215,7 +215,7 @@ const selectAllEpisode = async (ctx: MatchedContext): Promise<void> => {
             for (let j = 0; j < allDub.length; j++) {
                 const posts = await db.select().from(channelPost).where(eq(channelPost.episodeId, allDub[j]!.id));
                 for (let k = 0; k < posts.length; k++) {
-                    await ctx.telegram.copyMessage(ctx.chat!.id, channel!, posts[k]!.postId).catch((err: unknown) => {
+                    await ctx.api.copyMessage(chatId, channel!, posts[k]!.postId).catch((err: unknown) => {
                         console.error(err instanceof Error ? err.message : err);
                         logError("select_all_episode_" + String(allDub[j]!.id), err);
                     });
@@ -223,8 +223,11 @@ const selectAllEpisode = async (ctx: MatchedContext): Promise<void> => {
             }
         }
 
-        const buttons = [[Markup.button.callback("📄 Qismlar ro'yxati", "episode_list")], [Markup.button.callback("📂 Animelar ro'yxati", "anime_list")]];
-        await ctx.reply("Quyidagi menulardan birini tanlang 👇", { parse_mode: "HTML", ...Markup.inlineKeyboard(buttons) });
+        const buttons = [
+            [cb("📄 Qismlar ro'yxati", "episode_list")],
+            [cb("📂 Animelar ro'yxati", "anime_list")],
+        ];
+        await ctx.reply("Quyidagi menulardan birini tanlang 👇", { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
         await ctx.deleteMessage();
     } catch (error: unknown) {
         console.error(error instanceof Error ? error.message : error);
@@ -243,7 +246,7 @@ const backToAnime = async (ctx: MatchedContext): Promise<void> => {
         const [page] = await db.select().from(userPage).where(eq(userPage.userId, u.id)).limit(1);
 
         const { textList, buttons } = await renderAnimePage(page?.animePage ?? 0, page?.searching ?? "");
-        await ctx.reply(textList, { parse_mode: "HTML", ...Markup.inlineKeyboard(buttons) });
+        await ctx.reply(textList, { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
 
         void ctx.deleteMessage();
     } catch (error: unknown) {
@@ -262,8 +265,7 @@ const animeList = async (ctx: MatchedContext): Promise<void> => {
         }
         const [page] = await db.select().from(userPage).where(eq(userPage.userId, u.id)).limit(1);
         const { textList, buttons } = await renderAnimePage(page?.animePage ?? 0, page?.searching ?? "");
-        const keyboard = Markup.inlineKeyboard(buttons);
-        await ctx.reply(textList, { parse_mode: "HTML", ...keyboard });
+        await ctx.reply(textList, { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
         await ctx.deleteMessage();
     } catch (error: unknown) {
         console.error(error instanceof Error ? error.message : error);
@@ -281,8 +283,7 @@ const episodeList = async (ctx: MatchedContext): Promise<void> => {
         }
         const [page] = await db.select().from(userPage).where(eq(userPage.userId, u.id)).limit(1);
         const { textList, buttons } = await renderEpisodePage(page?.animeId ?? 0, page?.episodePage ?? 0);
-        const keyboard = Markup.inlineKeyboard(buttons);
-        await ctx.reply(textList, { parse_mode: "HTML", ...keyboard });
+        await ctx.reply(textList, { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
         await ctx.deleteMessage();
     } catch (error: unknown) {
         console.error(error instanceof Error ? error.message : error);
@@ -305,14 +306,18 @@ async function watch(ctx: MatchedContext): Promise<void> {
             return;
         }
 
+        const chatId = ctx.chat!.id;
         const [ep] = await db.select().from(episode).where(eq(episode.id, id)).limit(1);
         if (ep && channel) {
             const posts = await db.select().from(channelPost).where(eq(channelPost.episodeId, ep.id));
-            for (let i = 0; i < posts.length; i++) await ctx.telegram.copyMessage(ctx.chat!.id, channel, posts[i]!.postId);
+            for (let i = 0; i < posts.length; i++) await ctx.api.copyMessage(chatId, channel, posts[i]!.postId);
         } else void ctx.reply("❌ Topilmadi!");
 
-        const buttons = [[Markup.button.callback("📄 Qismlar ro'yxati", "episode_list")], [Markup.button.callback("📂 Animelar ro'yxati", "anime_list")]];
-        await ctx.reply("Quyidagi menulardan birini tanlang 👇", { parse_mode: "HTML", ...Markup.inlineKeyboard(buttons) });
+        const buttons = [
+            [cb("📄 Qismlar ro'yxati", "episode_list")],
+            [cb("📂 Animelar ro'yxati", "anime_list")],
+        ];
+        await ctx.reply("Quyidagi menulardan birini tanlang 👇", { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
     } catch (error: unknown) {
         console.error(error instanceof Error ? error.message : error);
         logError("watch", error);

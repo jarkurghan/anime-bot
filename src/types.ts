@@ -1,7 +1,4 @@
-import type { Context } from "telegraf";
+import type { Context } from "grammy";
 
-/** `bot.action` / `bot.on` handlerlarida `match` mavjud bo‘lganda */
-export type MatchedContext = Context & { match: RegExpExecArray };
-
-/** `/start` deep link */
-export type ContextWithStartPayload = Context & { startPayload?: string };
+/** Regex `callback_query` handler — Grammy `ctx.match` */
+export type MatchedContext = Context & { match: RegExpMatchArray };

@@ -1,4 +1,4 @@
-import type { Context } from "telegraf";
+import type { Context } from "grammy";
 
 const requiredChannels = [{ username: process.env.MY_CHANNEL_USERNAME, name: process.env.MY_CHANNEL_NAME }];
 

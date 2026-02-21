@@ -1,1 +1,1 @@
-export { db } from "./client.ts";
+export { db } from "./client.js";

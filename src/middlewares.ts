@@ -1,8 +1,8 @@
-import type { Context, MiddlewareFn } from "telegraf";
-import { userDb } from "../db/user-client.ts";
-import { animeBot } from "../db/schema.ts";
+import type { Context, Middleware } from "grammy";
+import { userDb } from "../db/user-client.js";
+import { animeBot } from "../db/schema.js";
 import { eq, and } from "drizzle-orm";
-import { logError } from "../logger/index.ts";
+import { logError } from "../logger/index.js";
 
 async function createUserDB(data: { date: string; tg_name: string; tg_user_id: number; tg_username?: string }): Promise<void> {
     try {
@@ -27,7 +27,7 @@ async function createUserDB(data: { date: string; tg_name: string; tg_user_id: n
     }
 }
 
-export const userActivity: MiddlewareFn<Context> = async (ctx, next) => {
+export const userActivity: Middleware<Context> = async (ctx, next) => {
     try {
         const isoDate = new Date().toISOString().slice(0, 10);
         const from = ctx.from;
