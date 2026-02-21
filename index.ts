@@ -1,7 +1,7 @@
-import "./load-env.js";
+import "@/load-env.js";
 import type { Context, Middleware } from "grammy";
 import { Bot, Composer } from "grammy";
-import { start } from "./src/start.js";
+import { start } from "@/src/start.js";
 import {
     watch,
     search,
@@ -14,10 +14,10 @@ import {
     animeList,
     episodeList,
     selectAllEpisode,
-} from "./src/methods.js";
-import { handleMessage } from "./src/auth.js";
-import { sendDataToAdmin, sendUserActivity } from "./src/scheduler.js";
-import { userActivity } from "./src/middlewares.js";
+} from "@/src/methods.js";
+import { handleMessage } from "@/src/auth.js";
+import { sendDataToAdmin, sendUserActivity } from "@/src/scheduler.js";
+import { userActivity } from "@/src/middlewares.js";
 
 const token = process.env.BOT_TOKEN;
 if (!token) {

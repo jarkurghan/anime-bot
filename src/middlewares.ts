@@ -1,8 +1,8 @@
 import type { Context, Middleware } from "grammy";
-import { userDb } from "../db/user-client.js";
-import { animeBot } from "../db/schema.js";
+import { userDb } from "@/db/user-client.js";
+import { animeBot } from "@/db/schema.js";
 import { eq, and } from "drizzle-orm";
-import { logError } from "../logger/index.js";
+import { logError } from "@/logger/index.js";
 
 async function createUserDB(data: { date: string; tg_name: string; tg_user_id: number; tg_username?: string }): Promise<void> {
     try {

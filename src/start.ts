@@ -1,14 +1,14 @@
 import type { Context } from "grammy";
-import { db } from "../db/client.js";
-import { user, userPage } from "../db/schema.js";
+import { db } from "@/db/client.js";
+import { user, userPage } from "@/db/schema.js";
 import { eq } from "drizzle-orm";
-import { checkSubscription } from "./check-subscription.js";
-import { renderAnimePage } from "./render-page.js";
-import { sendManga } from "./manga.js";
-import { logError } from "../logger/index.js";
-import { sendAnime } from "./request-from-channel.js";
-import { rowsToInlineKeyboard, urlBtn } from "./keyboards.js";
-import { getStartPayload } from "./start-payload.js";
+import { checkSubscription } from "@/src/check-subscription.js";
+import { renderAnimePage } from "@/src/render-page.js";
+import { sendManga } from "@/src/manga.js";
+import { logError } from "@/logger/index.js";
+import { sendAnime } from "@/src/request-from-channel.js";
+import { rowsToInlineKeyboard, urlBtn } from "@/src/keyboards.js";
+import { getStartPayload } from "@/src/start-payload.js";
 
 const requiredChannels = [{ username: process.env.MY_CHANNEL_USERNAME, name: process.env.MY_CHANNEL_NAME }];
 

@@ -4,11 +4,11 @@ import schedule from "node-schedule";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { db } from "../db/client.js";
-import { userDb } from "../db/user-client.js";
-import { user, anime, episode, dub, animeBot } from "../db/schema.js";
+import { db } from "@/db/client.js";
+import { userDb } from "@/db/user-client.js";
+import { user, anime, episode, dub, animeBot } from "@/db/schema.js";
 import { eq, lt, desc, sum } from "drizzle-orm";
-import { logError } from "../logger/index.js";
+import { logError } from "@/logger/index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

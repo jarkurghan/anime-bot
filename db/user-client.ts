@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
-import { animeBot } from "./schema.js";
+import { animeBot } from "@/db/schema.js";
 
 dotenv.config({ path: process.env.NODE_ENV === "production" ? ".env.production" : ".env" });
 dotenv.config({ path: process.env.NODE_ENV === "production" ? "../.env.production" : "../.env" });

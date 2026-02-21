@@ -1,1 +1,1 @@
-export { userDb as default } from "./user-client.js";
+export { userDb as default } from "@/db/user-client.js";

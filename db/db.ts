@@ -1,1 +1,1 @@
-export { db } from "./client.js";
+export { db } from "@/db/client.js";

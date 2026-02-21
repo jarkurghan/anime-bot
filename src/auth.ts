@@ -1,7 +1,7 @@
 import type { Context, Middleware } from "grammy";
-import { actions } from "./actions.js";
-import { checkSubscription } from "./check-subscription.js";
-import { rowsToInlineKeyboard, urlBtn } from "./keyboards.js";
+import { actions } from "@/src/actions.js";
+import { checkSubscription } from "@/src/check-subscription.js";
+import { rowsToInlineKeyboard, urlBtn } from "@/src/keyboards.js";
 
 const requiredChannels = [{ username: process.env.MY_CHANNEL_USERNAME, name: process.env.MY_CHANNEL_NAME }];
 const ADMIN_ID = process.env.ADMIN_ID;

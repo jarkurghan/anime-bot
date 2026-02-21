@@ -1,5 +1,5 @@
 import type { Context } from "grammy";
-import { logError } from "../logger/index.js";
+import { logError } from "@/logger/index.js";
 
 const sendManga = async (ctx: Context, startPayload: string): Promise<boolean | undefined> => {
     try {
