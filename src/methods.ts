@@ -1,11 +1,11 @@
 import type { Context } from "grammy";
-import { renderEpisodePage, renderAnimePage } from "@/src/render-page.js";
-import { logError } from "@/logger/index.js";
-import { db } from "@/db/client.js";
-import { user, userPage, anime, episode, channelPost } from "@/db/schema.js";
+import { renderEpisodePage, renderAnimePage } from "@/src/render-page.ts";
+import { logError } from "@/logger/index.ts";
+import { db } from "@/db/client.ts";
+import { user, userPage, anime, episode, channelPost } from "@/db/schema.ts";
 import { eq, and, gte, lte } from "drizzle-orm";
-import type { MatchedContext } from "@/src/types.js";
-import { cb, rowsToInlineKeyboard } from "@/src/keyboards.js";
+import type { MatchedContext } from "@/src/types.ts";
+import { cb, rowsToInlineKeyboard } from "@/src/keyboards.ts";
 
 const search = async (ctx: Context): Promise<void> => {
     try {

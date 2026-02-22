@@ -1,8 +1,8 @@
 import type { Context } from "grammy";
-import { db } from "@/db/client.js";
-import { episode, channelPost } from "@/db/schema.js";
+import { db } from "@/db/client.ts";
+import { episode, channelPost } from "@/db/schema.ts";
 import { eq, and, inArray } from "drizzle-orm";
-import { logError } from "@/logger/index.js";
+import { logError } from "@/logger/index.ts";
 
 const sendAnime = async (ctx: Context, startPayload: string): Promise<boolean> => {
     try {

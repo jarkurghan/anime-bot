@@ -13,6 +13,7 @@
         "esModuleInterop": true,
         "resolveJsonModule": true,
         "noEmit": true,
+        "allowImportingTsExtensions": true,
         "types": ["bun", "node"]
     },
     "include": ["index.ts", "load-env.ts", "drizzle.config.ts", "db/**/*.ts", "logger/**/*.ts", "src/**/*.ts"],

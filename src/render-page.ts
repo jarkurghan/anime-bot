@@ -1,7 +1,7 @@
-import { db } from "@/db/client.js";
-import { anime, episode } from "@/db/schema.js";
+import { db } from "@/db/client.ts";
+import { anime, episode } from "@/db/schema.ts";
 import { eq, or, ilike, asc, sql } from "drizzle-orm";
-import { cb } from "@/src/keyboards.js";
+import { cb } from "@/src/keyboards.ts";
 
 type CallbackButton = ReturnType<typeof cb>;
 type ButtonRow = CallbackButton[];
