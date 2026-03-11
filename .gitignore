@@ -1,10 +1,14 @@
 node_modules/
 dist/
 package-lock.json
-db/seeds/
+
+drizzle/
+src/db/seeds/
 db/migrations/
-logger/logs/*.log
+src/logger/logs/*.log
 db/*.sqlite
+
 .env
 .env.production
+
 drafts/
