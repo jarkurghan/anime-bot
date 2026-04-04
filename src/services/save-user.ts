@@ -42,7 +42,7 @@ export async function saveUser(ctx: Context, prop?: { utm?: string; today_count?
         if (!existing) {
             await ctx.reply("Botga xush kelibsiz! 🎉", { reply_markup: { remove_keyboard: true } });
 
-            const utm = prop?.utm || "-";
+            const utm = prop?.utm || "noma'lum";
             const username = user.username ? `@${user.username}` : "Noma'lum";
             const userlink = userLink(userData);
             const msg =

@@ -2,6 +2,7 @@ import type { Context } from "grammy";
 
 import { sendAnime } from "@/services/request-from-channel.ts";
 import { rowsToInlineKeyboard } from "@/services/keyboards.ts";
+import { resolveUtmFromStartPayload } from "@/services/start-payload.ts";
 import { getStartPayload } from "@/services/start-payload.ts";
 import { renderAnimePage } from "@/services/render-page.ts";
 import { sendManga } from "@/services/manga.ts";
@@ -15,12 +16,11 @@ export async function botStart(ctx: Context) {
     try {
         if (!ctx.from) return;
 
-        console.log(ctx.from.id);
-
-        const [user] = await saveUser(ctx);
-        if (!user) return;
-
         const startPayload = getStartPayload(ctx);
+
+        const utm = resolveUtmFromStartPayload(startPayload);
+        const [user] = await saveUser(ctx, { utm });
+        if (!user) return;
 
         if (startPayload.slice(0, 5) === "manga") {
             const manga = await sendManga(ctx, startPayload);
@@ -38,7 +38,6 @@ export async function botStart(ctx: Context) {
         const { textList, buttons } = await renderAnimePage(userPageDefaults.anime_page || 0, userPageDefaults.searching || "");
         await ctx.reply(textList, { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
     } catch (error) {
-        await ctx.reply("❌ Xatolik yuz berdi. Iltimos, dasturchiga xabar bering.");
         await sendErrorLog({ ctx, event: "bot_start", error });
     }
 }

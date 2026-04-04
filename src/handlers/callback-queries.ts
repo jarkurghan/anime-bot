@@ -9,7 +9,6 @@ import { CHANNEL } from "@/utils/constants.ts";
 import { counter } from "@/services/counter.ts";
 
 const message2 = "❌ Kutilmagan xatolik yuz berdi. Iltimos, /start buyrug'ini bosing.";
-const errorMsg = "❌ Xatolik yuz berdi. Iltimos, dasturchiga xabar bering.";
 
 export const search = async (ctx: Context) => {
     try {
@@ -27,7 +26,6 @@ export const search = async (ctx: Context) => {
         const { textList, buttons } = await renderAnimePage(0, message);
         await ctx.reply(textList, { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
     } catch (error) {
-        await ctx.reply(errorMsg);
         await sendErrorLog({ ctx, event: "search", error });
     }
 };
@@ -43,7 +41,6 @@ export const reserFilter = async (ctx: Filter<Context, "callback_query">) => {
         const { textList, buttons } = await renderAnimePage(0, "");
         await ctx.editMessageText(textList, { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
     } catch (error) {
-        await ctx.reply("❌ Xatolik yuz berdi. Iltimos, keyinroq urinib ko'ring.");
         await sendErrorLog({ ctx, event: "reset_filter", error });
     }
 };
@@ -61,7 +58,6 @@ export const changePage = async (ctx: Filter<Context, "callback_query">) => {
         const { textList, buttons } = await renderAnimePage(page, updated?.searching || "");
         await ctx.editMessageText(textList, { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
     } catch (error) {
-        await ctx.reply(errorMsg);
         await sendErrorLog({ ctx, event: "change_page", error });
     }
 };
@@ -99,7 +95,6 @@ export const selectAnime = async (ctx: Filter<Context, "callback_query">) => {
                 for (let i = 0; i < posts.length; i++)
                     await ctx.api.copyMessage(chatId, CHANNEL, posts[i]!.post_id).catch(async (error) => {
                         await sendErrorLog({ ctx, event: "select_anime", error });
-                        await ctx.reply("❌ Topilmadi!");
                     });
                 await counter(ctx, ep.id, posts.length);
 
@@ -117,7 +112,6 @@ export const selectAnime = async (ctx: Filter<Context, "callback_query">) => {
 
         await ctx.deleteMessage();
     } catch (error) {
-        await ctx.reply(errorMsg);
         await sendErrorLog({ ctx, event: "select_anime", error });
     }
 };
@@ -136,7 +130,6 @@ export const episodePage = async (ctx: Filter<Context, "callback_query">) => {
         const { textList, buttons } = await renderEpisodePage(animeId, page);
         await ctx.editMessageText(textList, { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
     } catch (error) {
-        await ctx.reply(errorMsg);
         await sendErrorLog({ ctx, event: "episode_page", error });
     }
 };
@@ -161,7 +154,7 @@ export const selectEpisode = async (ctx: Filter<Context, "callback_query">) => {
             const chatId = ctx.chat!.id;
             for (let i = 0; i < posts.length; i++)
                 await ctx.api.copyMessage(chatId, CHANNEL!, posts[i]!.post_id).catch(async (error) => {
-                    await sendErrorLog({ ctx, event: "select_episode", error });
+                    await sendErrorLog({ ctx, event: "select_episode post_id:" + posts[i]!.post_id, error });
                     await ctx.reply("❌ Topilmadi!");
                 });
             await counter(ctx, id, posts.length);
@@ -177,7 +170,6 @@ export const selectEpisode = async (ctx: Filter<Context, "callback_query">) => {
         }
     } catch (error) {
         await sendErrorLog({ ctx, event: "select_episode", error });
-        await ctx.reply(errorMsg);
     }
 };
 
@@ -206,8 +198,7 @@ export const selectAllEpisode = async (ctx: Filter<Context, "callback_query">) =
                 const posts = await db.select().from(channelPost).where(eq(channelPost.episode_id, allDub[j]!.id));
                 for (let k = 0; k < posts.length; k++) {
                     await ctx.api.copyMessage(chatId, CHANNEL!, posts[k]!.post_id).catch(async (error) => {
-                        await sendErrorLog({ ctx, event: "select_all_episode", error });
-                        await ctx.reply("❌ Topilmadi!");
+                        await sendErrorLog({ ctx, event: "select_all_episode post_id:" + posts[k]!.post_id, error });
                     });
                 }
                 await counter(ctx, allDub[j]!.id, posts.length);
@@ -218,7 +209,6 @@ export const selectAllEpisode = async (ctx: Filter<Context, "callback_query">) =
         await ctx.reply("Quyidagi menulardan birini tanlang 👇", { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
         await ctx.deleteMessage();
     } catch (error) {
-        await ctx.reply(errorMsg);
         await sendErrorLog({ ctx, event: "select_all_episode", error });
     }
 };
@@ -236,7 +226,6 @@ export const backToAnime = async (ctx: Filter<Context, "callback_query">) => {
 
         await ctx.deleteMessage();
     } catch (error) {
-        await ctx.reply(errorMsg);
         await sendErrorLog({ ctx, event: "back_to_anime", error });
     }
 };
@@ -252,7 +241,6 @@ export const animeList = async (ctx: Filter<Context, "callback_query">) => {
         await ctx.reply(textList, { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
         await ctx.deleteMessage();
     } catch (error) {
-        await ctx.reply(errorMsg);
         await sendErrorLog({ ctx, event: "anime_list", error });
     }
 };
@@ -269,7 +257,6 @@ export const episodeList = async (ctx: Filter<Context, "callback_query">) => {
         await ctx.reply(textList, { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
         await ctx.deleteMessage();
     } catch (error) {
-        await ctx.reply(errorMsg);
         await sendErrorLog({ ctx, event: "episode_list", error });
     }
 };
@@ -296,7 +283,6 @@ export const watch = async (ctx: Filter<Context, "callback_query">) => {
         const buttons = [[cb("📄 Qismlar ro'yxati", "episode_list")], [cb("📂 Animelar ro'yxati", "anime_list")]];
         await ctx.reply("Quyidagi menulardan birini tanlang 👇", { parse_mode: "HTML", reply_markup: rowsToInlineKeyboard(buttons) });
     } catch (error) {
-        await ctx.reply(errorMsg);
         await sendErrorLog({ ctx, event: "watch", error });
     }
 };

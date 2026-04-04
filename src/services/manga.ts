@@ -1,6 +1,7 @@
 import type { Context } from "grammy";
 import { sendErrorLog } from "@/services/log.ts";
 import { CHANNEL } from "@/utils/constants.ts";
+import { counter } from "./counter.ts";
 
 const sendManga = async (ctx: Context, startPayload: string): Promise<boolean | undefined> => {
     try {
@@ -8,6 +9,8 @@ const sendManga = async (ctx: Context, startPayload: string): Promise<boolean | 
         if (!CHANNEL) return undefined;
 
         if (manga === "boruto") {
+            counter(ctx);
+
             const post_id = startPayload.slice(13);
             const chatId = ctx.chat?.id;
             if (chatId === undefined) return undefined;
@@ -54,7 +57,6 @@ const sendManga = async (ctx: Context, startPayload: string): Promise<boolean | 
         }
     } catch (error) {
         await sendErrorLog({ ctx, event: "send_manga", error });
-        await ctx.reply("❌ Xatolik yuz berdi. Iltimos, dasturchiga xabar bering.");
     }
 };
 

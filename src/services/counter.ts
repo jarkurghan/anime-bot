@@ -7,7 +7,7 @@ import { sendErrorLog } from "@/services/log.ts";
 import { abu, episode } from "@/db/schema.ts";
 import { db } from "@/db/client.ts";
 
-export const counter = async (ctx: Context, episodeId: number, step?: number) => {
+export const counter = async (ctx: Context, episodeId?: number, step?: number) => {
     try {
         const chat = ctx.chat;
         if (!chat) return;
@@ -33,14 +33,16 @@ export const counter = async (ctx: Context, episodeId: number, step?: number) =>
                 await saveUser(ctx, { today_count: c, total_count: c });
             }
 
-            const whereCondition2 = eq(episode.id, episodeId);
-            const [ep] = await db.select().from(episode).where(whereCondition2).limit(1);
-            if (ep) {
-                let { total_count, today_count } = ep;
-                today_count += c;
-                total_count += c;
-                const episodeData = { today_count, total_count };
-                await db.update(episode).set(episodeData).where(whereCondition2);
+            if (episodeId) {
+                const whereCondition2 = eq(episode.id, episodeId);
+                const [ep] = await db.select().from(episode).where(whereCondition2).limit(1);
+                if (ep) {
+                    let { total_count, today_count } = ep;
+                    today_count += c;
+                    total_count += c;
+                    const episodeData = { today_count, total_count };
+                    await db.update(episode).set(episodeData).where(whereCondition2);
+                }
             }
         }
     } catch (err) {

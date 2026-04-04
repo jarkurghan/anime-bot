@@ -1,4 +1,4 @@
-import { Bot } from "grammy";
+import { Bot, webhookCallback } from "grammy";
 import { BOT_TOKEN } from "@/utils/constants.ts";
 import { botStart } from "@/handlers/register-start-command.ts";
 import { errorHandler } from "./handlers/register-error-handler.ts";
@@ -39,9 +39,9 @@ bot.on("my_chat_member", registerChatMember);
 
 bot.catch(errorHandler);
 
-// export const handleUpdate = webhookCallback(bot, "hono");
+export const handleUpdate = webhookCallback(bot, "hono");
 
-export function startBot() {
-    console.log("Bot is running...");
-    return bot.start();
-}
+// export function startBot() {
+//     console.log("Bot is running...");
+//     return bot.start();
+// }
