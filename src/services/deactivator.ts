@@ -33,7 +33,7 @@ export async function changeStatus(ctx: Context, status: UserStatus) {
                 `👤 Ism: ${userlink}\n` +
                 `🆔 User ID: <code>${tg_id}</code>\n` +
                 `♻️ Yangi status: ${status}\n` +
-                `🤖 Bot: @insta_yuklagich_bot`;
+                `🤖 Bot: @aniuz_bot`;
             await sendAdmin(msg);
         }
     } catch (error) {
