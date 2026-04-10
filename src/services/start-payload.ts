@@ -13,8 +13,8 @@ export function resolveUtmFromStartPayload(startPayload: string): string {
 
     if (p.includes("utm-")) {
         const utm = p.slice(p.indexOf("utm-") + 4);
-        if (utm.includes("ikki_moviy_girdob") return "@ikki_moviy_girdob";
-        else if (utm.includes("karyera") return "@meni_botlarim";
+        if (utm.includes("ikki_moviy_girdob")) return "@ikki_moviy_girdob";
+        else if (utm.includes("karyera")) return "@meni_botlarim";
         else return utm;
     }
 
