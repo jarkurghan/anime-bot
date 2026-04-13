@@ -39,12 +39,14 @@ export const anime = pgTable("anime", {
     name: text("name").notNull(),
     keys: text("keys"),
     number_of_episode: integer("number_of_episode"),
+    created_at: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const dub = pgTable("dub", {
     id: serial("id").primaryKey(),
     username: text("username"),
     name: text("name"),
+    created_at: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const episode = pgTable("episode", {
@@ -55,16 +57,19 @@ export const episode = pgTable("episode", {
     episode: text("episode").notNull(),
     name: text("name").notNull(),
     dub: text("dub"),
+    created_at: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const channelPost = pgTable("channel_post", {
     id: serial("id").primaryKey(),
     episode_id: integer("episode_id").notNull(),
     post_id: bigint("post_id", { mode: "number" }).notNull(),
+    created_at: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const animeInfo = pgTable("anime_info", {
     id: serial("id").primaryKey(),
     post_id: bigint("post_id", { mode: "number" }).notNull(),
     anime_id: integer("anime_id").notNull(),
+    created_at: timestamp("created_at").defaultNow().notNull(),
 });
