@@ -48,13 +48,12 @@ const sendToAllUsers = async (): Promise<void> => {
 
     for (const user of users) {
         if (user.status === "has_blocked" || user.status === "deleted_account") continue;
-        if (String(user.tg_id) !== "6389479517") continue;
         try {
             const message =
                 "Assalomu alaykum! 👋\n\n" +
                 "Sizni multfilm botimizga taklif qilamiz. Botda 300dan koʻproq multfilm bor va har kuni qoʻshib boryapmiz.\n\n" +
-                `<a href="https://t.me/uz_multfilm_bot?start=aniuzbot">@uz_multfilm_bot</a> shunchaki sinab koʻring 😉`;
-            await bot.api.sendMessage(user.tg_id, message, { parse_mode: "HTML" });
+                `<a href="https://t.me/uz_multfilm_bot?start=utm-aniuzbot">@uz_multfilm_bot</a> shunchaki sinab koʻring 😉`;
+            await bot.api.sendMessage(user.tg_id, message, { parse_mode: "HTML", link_preview_options: { is_disabled: true } });
             sent++;
         } catch (error) {
             failed++;
