@@ -7,6 +7,10 @@ export function getStartPayload(ctx: Context): string {
     return m?.[1]?.trim() || "";
 }
 
+/**
+ * https://t.me/aniuz_bot?start=watch_anime_539
+ * shunday linklar tarqalib ketgani uchun, object ko'rinishiga o'tkazib bo'lmaydi
+ */
 export function resolveUtmFromStartPayload(startPayload: string): string {
     const p = startPayload.trim();
     if (!p) return "";
