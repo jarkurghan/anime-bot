@@ -73,3 +73,29 @@ export const animeInfo = pgTable("anime_info", {
     anime_id: integer("anime_id").notNull(),
     created_at: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const imdb = pgTable("with_imdb", {
+    id: serial("id").primaryKey(),
+    name: text("name"),
+    imdb_id: text("imdb_id").unique(),
+    imdb_info: text("imdb_info"),
+    imdb_plot: text("imdb_plot"),
+    dub: text("dub"),
+    anime_id: integer("anime_id").notNull(),
+    created_at: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const imdbe = pgTable("with_imdb_episode", {
+    id: serial("id").primaryKey(),
+    name: text("name"),
+    with_imdb_id: integer("with_imdb_id").notNull(),
+    imdb_id: text("imdb_id").unique(),
+    imdb_info: text("imdb_info"),
+    imdb_plot: text("imdb_plot"),
+    dub: text("dub"),
+    items: text("items"),
+    episode_id: integer("episode_id").notNull(),
+    created_at: timestamp("created_at").defaultNow().notNull(),
+    number: integer("number"),
+    season: integer("season"),
+});
