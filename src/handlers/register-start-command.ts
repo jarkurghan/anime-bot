@@ -18,7 +18,7 @@ export async function botStart(ctx: Context) {
 
         const startPayload = getStartPayload(ctx);
 
-        const utm = resolveUtmFromStartPayload(startPayload);
+        const utm = await resolveUtmFromStartPayload(startPayload);
         const [user] = await saveUser(ctx, { utm });
         if (!user) return;
 
