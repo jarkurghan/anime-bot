@@ -266,7 +266,7 @@ export const watch = async (ctx: Filter<Context, "callback_query">) => {
         const id = Number(ctx.match![1]);
         const userId = ctx.from!.id;
 
-        await ctx.deleteMessage();
+        await ctx.deleteMessage().catch();
 
         const whereCondition = eq(abu.tg_id, String(userId));
         const [u] = await db.select().from(abu).where(whereCondition).limit(1);
